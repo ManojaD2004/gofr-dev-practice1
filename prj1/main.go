@@ -63,6 +63,16 @@ func main() {
 		f, _ := ctx.File.Create(smallFirstLetter(newType.TypeName) + ".go")
 		n, _ := f.Write([]byte(s))
 		fmt.Println(s, n)
+		s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"github.com/ManojaD2004/types"` + "\n)\n\n" 
+		s = s + "func " + smallFirstLetter(newType.TypeName) + "Handler " + "(ctx *gofr.Context) (interface{}, error) {\n"
+		s = s + "\treqBody := t."  + capitalizeFirstLetter(newType.TypeName) + "Type{}\n"
+		s = s + "\tctx.Bind(" + "&reqBody" + ")\n"
+		s = s + "\treturn \"Hello World\", nil\n"
+		s = s + "}\n\n"
+		ctx.File.ChDir("../route")
+		f, _ = ctx.File.Create(smallFirstLetter(newType.TypeName) + "Route" + ".go")
+		n, _ = f.Write([]byte(s))
+		fmt.Println(s, n)
 		return "Hello Tiger!", nil
 	})
 	// it can be over-ridden through configs

@@ -5,7 +5,6 @@ go 1.23.3
 require (
 	github.com/redis/go-redis/v9 v9.7.0
 	gofr.dev v1.27.1
-	gofr.dev/pkg/gofr/datasource/file/ftp v0.1.0
 )
 
 require (

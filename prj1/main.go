@@ -6,6 +6,21 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
+func recur(m *map[string]interface{}, key1 string) {
+	for key, value := range *m {
+		switch val := value.(type) {
+		case string:
+			fmt.Println(key1, key, val)
+		case map[string]interface{}:
+			fmt.Println(key1, key, val)
+			recur(&val, key1 + " " + key)
+		default:
+			fmt.Println("Error!")
+		}
+		// fmt.Println("Key: ", key, " Value: ", value)
+	}
+}
+
 func main() {
 	// initialise gofr object
 	app := gofr.New()
@@ -20,17 +35,7 @@ func main() {
 		if !ok {
 			return nil, fmt.Errorf("invalid request body type, expected map[string]interface{}")
 		}
-		for key, value := range reqType {
-			switch val := value.(type) {
-			case string:
-				fmt.Println("This is a string", val)
-			case map[string]interface{}:
-				fmt.Println("This is a json", val)
-			default:
-				fmt.Println("Error!")
-			}
-			fmt.Println("Key: ", key, " Value: ", value)
-		}
+		recur(&reqType, newType.TypeName)
 		return "Hello Tiger!", nil
 	})
 	// it can be over-ridden through configs

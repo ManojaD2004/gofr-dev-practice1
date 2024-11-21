@@ -1,13 +1,15 @@
 package route
 
 import (
-	"gofr.dev/pkg/gofr"
+	"fmt"
+
 	t "github.com/ManojaD2004/types"
+	"gofr.dev/pkg/gofr"
 )
 
-func userHandler (ctx *gofr.Context) (interface{}, error) {
+func UserHandler(ctx *gofr.Context) (interface{}, error) {
 	reqBody := t.UserType{}
 	ctx.Bind(&reqBody)
+	fmt.Println(reqBody)
 	return "Hello World", nil
 }
-

@@ -5,3 +5,4 @@ type RouteType struct {
 	ReqBody interface{} `json:"reqBody"`
 	ResBody interface{} `json:"resBody"`
 } 
+

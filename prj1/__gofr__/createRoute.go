@@ -4,6 +4,7 @@ import (
 	"fmt"
 	t "github.com/ManojaD2004/types"
 	"gofr.dev/pkg/gofr"
+	"strings"
 )
 
 func CreateRoute(ctx *gofr.Context) (interface{}, error) {
@@ -11,10 +12,10 @@ func CreateRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.Bind(&newType)
 	reqType, ok := newType.ReqBody.(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("invalid request body type, expected map[string]interface{}")
+		return nil, fmt.Errorf("invalid request body type")
 	}
 	s := ""
-	fmt.Println(newType)
+	// fmt.Println(newType)
 	recur(&reqType, &s, 1)
 	s = "type " + capitalizeFirstLetter(newType.TypeName) + "Type " + s
 	s = "package types\n\n" + s
@@ -33,16 +34,36 @@ func CreateRoute(ctx *gofr.Context) (interface{}, error) {
 	reader1.Scan(&b)
 	modName := b[7:]
 	fmt.Printf("%v\n", modName)
-	s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"github.com/ManojaD2004/types"` + "\n)\n\n"
+	s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"` + modName + `/types"` + "\n)\n\n"
 	s = s + "func " + capitalizeFirstLetter(newType.TypeName) + "Handler " + "(ctx *gofr.Context) (interface{}, error) {\n"
 	s = s + "\treqBody := t." + capitalizeFirstLetter(newType.TypeName) + "Type{}\n"
 	s = s + "\tctx.Bind(" + "&reqBody" + ")\n"
 	s = s + "\treturn \"Hello World\", nil\n"
 	s = s + "}\n\n"
-	ctx.File.ChDir("../route")
+	ctx.File.ChDir("./route")
+	f1, _ := ctx.File.Open(smallFirstLetter(newType.TypeName) + "Route" + ".go")
+	if f1 == nil {
+		ctx.File.ChDir("..")
+		f2, _ := ctx.File.Open("main.go")
+		tempS := ""
+		reader2, _ := f2.ReadAll()
+		for reader2.Next() {
+			var b string
+			reader2.Scan(&b)
+			tempS += b + "\n"
+		}
+		newStr := strings.Replace(tempS, "// register routes", "// register routes\n\t"+`app.POST("/`+smallFirstLetter(newType.TypeName)+`",r.`+capitalizeFirstLetter(newType.TypeName)+`Handler)`, 1)
+		fmt.Println(newStr)
+		f2.Close()
+		f3, _ := ctx.File.Create("main.go")
+		f3.Write([]byte(newStr))
+		f3.Close()
+		ctx.File.ChDir("./route")
+	}
 	f, _ = ctx.File.Create(smallFirstLetter(newType.TypeName) + "Route" + ".go")
 	n, _ = f.Write([]byte(s))
-
+	f.Close()
 	fmt.Println(n)
+
 	return "Hello Tiger!", nil
 }

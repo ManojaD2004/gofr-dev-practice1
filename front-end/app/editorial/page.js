@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
+import toast from "react-hot-toast";
 
 const Page = () => {
-  const [selectedOption, setSelectedOption] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  const [selectedOption, setSelectedOption] = useState("GET");
+  const [typeName, setInputValue] = useState("");
   const [requestJSON, setRequestJSON] = useState(`{
     "name": "John Doe",
     "requestType": "GET",
@@ -37,10 +38,7 @@ const Page = () => {
 
   
   const handleClick = async () => {
-    console.log("Selected Option:", selectedOption);
-    console.log("Input Value:", inputValue);
-    console.log("Editor Content:", requestJSON);
-    console.log("Editor1 Content:",requestJSON1);
+    
 
     try {
   
@@ -53,8 +51,38 @@ const Page = () => {
     }
   };
 
+
   const apireq = async () => {
-    console.log("hello");
+    
+    const data={typeName,reqbody:JSON.parse(requestJSON),resbody:JSON.parse(requestJSON1)};
+    console.log(data);
+    try {
+        const response = await fetch(`https://31f8-115-99-94-143.ngrok-free.app/create-route`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+  
+        if (!response.ok) {
+          
+          toast.error("Error creating API");
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const result = await response.json();
+        console.log("Succesfull", result);
+        if (result.data==="Hello Tiger!") {
+          console.log("Done");
+          toast.success("New API created");
+        }
+        setResponseJSON(JSON.stringify(result, null, 2)); 
+      } catch (error) {
+        toast.error("Error creating API");
+        console.error("Error posting data:", error);
+        setResponseJSON("Invalid JSON response or server error. Check console logs.");
+      }
   };
   
 
@@ -96,7 +124,7 @@ const Page = () => {
             <input
               type="text"
               placeholder="Enter URL or paste text"
-              value={inputValue}
+              value={typeName}
               onChange={handleChange1}
               className="h-[35px] w-[160vh] border-none bg-[#1e1e1e] pl-[20px] font-sans text-sm "
             />

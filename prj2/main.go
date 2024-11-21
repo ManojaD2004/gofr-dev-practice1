@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
+
 	t "github.com/ManojaD2004/types"
 	"gofr.dev/pkg/gofr"
 )
@@ -62,9 +65,9 @@ func main() {
 		f, _ := ctx.File.Create(smallFirstLetter(newType.TypeName) + ".go")
 		n, _ := f.Write([]byte(s))
 		fmt.Println(s, n)
-		s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"github.com/ManojaD2004/types"` + "\n)\n\n" 
+		s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"github.com/ManojaD2004/types"` + "\n)\n\n"
 		s = s + "func " + smallFirstLetter(newType.TypeName) + "Handler " + "(ctx *gofr.Context) (interface{}, error) {\n"
-		s = s + "\treqBody := t."  + capitalizeFirstLetter(newType.TypeName) + "Type{}\n"
+		s = s + "\treqBody := t." + capitalizeFirstLetter(newType.TypeName) + "Type{}\n"
 		s = s + "\tctx.Bind(" + "&reqBody" + ")\n"
 		s = s + "\treturn \"Hello World\", nil\n"
 		s = s + "}\n\n"
@@ -75,5 +78,52 @@ func main() {
 		return "Hello Tiger!", nil
 	})
 	// it can be over-ridden through configs
+	app.Subscribe("order-logs", func(c *gofr.Context) error {
+		var orderStatus struct {
+			OrderId string `json:"orderId"`
+			Status  string `json:"status"`
+		}
+
+		err := c.Bind(&orderStatus)
+		if err != nil {
+			c.Logger.Error(err)
+			return nil
+		}
+		fmt.Println("I am in kafka!")
+		c.Logger.Info("Received order ", orderStatus)
+
+		return nil
+	})
+	app.POST("/publish-order", order)
 	app.Run()
+}
+
+func order(ctx *gofr.Context) (interface{}, error) {
+	type orderStatus struct {
+		OrderId string `json:"orderId"`
+		Status  string `json:"status"`
+	}
+
+	var data orderStatus
+	b := t.User1{UserName: "manu", Id: 7}
+	fmt.Println(b.Validate())
+	if !b.Validate() {
+		return nil, errors.New("wrong Data Valid")
+	}
+	err := ctx.Bind(&data)
+	if err != nil {
+		return nil, err
+	}
+	data.OrderId = "202"
+	msg, _ := json.Marshal(data)
+	err = ctx.GetPublisher().Publish(ctx, "order-logs", msg)
+	if err != nil {
+		return nil, err
+	}
+	err = ctx.GetPublisher().Publish(ctx, "dummy", msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return "Published", nil
 }

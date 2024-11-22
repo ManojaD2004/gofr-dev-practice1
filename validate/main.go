@@ -45,6 +45,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 				if maxProvided {
 					validationLogic += fmt.Sprintf("lt(len(%s), %d) && ", fieldPath, max)
 				}
+				if key == "email" {
+					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)
+				}
 			} else {
 				if minProvided {
 					validationLogic += fmt.Sprintf("gt(%s, %d) && ", fieldPath, min)

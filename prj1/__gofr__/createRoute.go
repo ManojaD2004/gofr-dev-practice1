@@ -2,22 +2,21 @@ package __gofr__
 
 import (
 	"fmt"
-	t "github.com/ManojaD2004/types"
-	"gofr.dev/pkg/gofr"
 	"strings"
+
+	"gofr.dev/pkg/gofr"
 )
 
 func CreateRoute(ctx *gofr.Context) (interface{}, error) {
-	newType := t.RouteType{}
+	newType := RouteType{}
 	ctx.Bind(&newType)
 	reqType, ok := newType.ReqBody.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("invalid request body type")
 	}
 	s := ""
-	// fmt.Println(newType)
 	recur(&reqType, &s, 1)
-	s = "type " + capitalizeFirstLetter(newType.TypeName) + "Type " + s
+	s = "type " + capWord(newType.TypeName) + "Type " + s
 	s = "package types\n\n" + s
 	ctx.File.ChDir("./types")
 	f, _ := ctx.File.Create(smallFirstLetter(newType.TypeName) + ".go")
@@ -35,8 +34,8 @@ func CreateRoute(ctx *gofr.Context) (interface{}, error) {
 	modName := b[7:]
 	fmt.Printf("%v\n", modName)
 	s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"` + modName + `/types"` + "\n)\n\n"
-	s = s + "func " + capitalizeFirstLetter(newType.TypeName) + "Handler " + "(ctx *gofr.Context) (interface{}, error) {\n"
-	s = s + "\treqBody := t." + capitalizeFirstLetter(newType.TypeName) + "Type{}\n"
+	s = s + "func " + capWord(newType.TypeName) + "Handler " + "(ctx *gofr.Context) (interface{}, error) {\n"
+	s = s + "\treqBody := t." + capWord(newType.TypeName) + "Type{}\n"
 	s = s + "\tctx.Bind(" + "&reqBody" + ")\n"
 	s = s + "\treturn \"Hello World\", nil\n"
 	s = s + "}\n\n"
@@ -52,7 +51,7 @@ func CreateRoute(ctx *gofr.Context) (interface{}, error) {
 			reader2.Scan(&b)
 			tempS += b + "\n"
 		}
-		newStr := strings.Replace(tempS, "// register routes", "// register routes\n\t"+`app.POST("/`+smallFirstLetter(newType.TypeName)+`",r.`+capitalizeFirstLetter(newType.TypeName)+`Handler)`, 1)
+		newStr := strings.Replace(tempS, "// register routes", "// register routes\n\t"+`app.POST("/`+smallFirstLetter(newType.TypeName)+`",r.`+capWord(newType.TypeName)+`Handler)`, 1)
 		fmt.Println(newStr)
 		f2.Close()
 		f3, _ := ctx.File.Create("main.go")

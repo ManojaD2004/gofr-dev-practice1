@@ -10,9 +10,9 @@ func main() {
 	// initialise gofr object
 	app := gofr.New()
 	// register routes
-	app.POST("/user",r.UserHandler)
 	app.GET("/greet", r.GreetRouteGET)
 	app.POST("/create-route", __gofr__.CreateRoute)
+	app.POST("/.__gofr__/create-type", __gofr__.CreateType)
 	// it can be over-ridden through configs
 	app.Run()
 }

@@ -121,7 +121,7 @@ const Datasender = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen">
+    <div className="bg-black min-h-screen ">
       <div className="h-[150px] flex items-center  px-8 text-white justify-between">
         <div className="flex items-center">
           <div className="border-r border-[#6b6b6b]">
@@ -175,7 +175,7 @@ const Datasender = () => {
         </div>
 
         <button
-          className="bg-[#0164d2] px-[40px] font-semibold text-sm py-[10px] text-white rounded ml-[40px]"
+          className="bg-white px-[40px] font-semibold text-sm py-[10px] text-black rounded ml-[40px]"
           onClick={handleSend}
         >
           Send

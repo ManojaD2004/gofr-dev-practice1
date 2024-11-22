@@ -3,7 +3,7 @@ package __gofr__
 import (
 	"fmt"
 	"reflect"
-	"strconv"
+	// "strconv"
 	"strings"
 )
 
@@ -59,17 +59,24 @@ func recurValidate(m *map[string]interface{}, s *string, v *string, level int, p
 			parts := strings.Fields(val)
 			fieldType := parts[0]
 			if !isPrimitiveType(fieldType) {
-				*v += "a = a && " + "p." + capWord(toUnderscore(key)) + ".Validate()"
+				// Validate Part
+				*v += "\ta = a && q" + parent + "." + capWord(toUnderscore(key)) + ".Validate()\n"
+				// Type Part
 				*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " " + capWord(toUnderscore(fieldType)) + "Type `json:\"" + key + "\"`\n"
 			} else {
+				// Validate Part
 				if len(parts) > 1 {
-					*v += "a = a "
+					*v += "\ta = a"
 				}
 				for i := 1; i < len(parts); i++ {
-					*v += "&& "
+					*v += " && "
 					part := parts[i]
 					handleValidatePart(v, part, parent+"."+capWord(toUnderscore(key)))
 				}
+				if len(parts) > 1 {
+					*v += "\n"
+				}
+				// Type Part
 				*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " " + fieldType + " `json:\"" + key + "\"`\n"
 			}
 		case map[string]interface{}:
@@ -80,7 +87,32 @@ func recurValidate(m *map[string]interface{}, s *string, v *string, level int, p
 			if len(val) == 1 {
 				switch val1 := val[0].(type) {
 				case string:
-					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + val1 + " `json:\"" + key + "\"`\n"
+					parts := strings.Fields(val1)
+					fieldType := parts[0]
+					if !isPrimitiveType(fieldType) {
+						// Validate Part
+						*v += "\tfor i := 0; i < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i++ {\n"
+						*v += "\t\ta = a && " + "q" + parent + "." + capWord(toUnderscore(key)) + "[i].Validate()\n"
+						*v += "\t}\n"
+						// Type Part
+						*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + capWord(toUnderscore(fieldType)) + "Type `json:\"" + key + "\"`\n"
+					} else {
+						// Validate Part
+						if len(parts) > 1 {
+							*v += "\tfor i := 0; i < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i++ {\n"
+							*v += "\t\ta = a"
+						}
+						for i := 1; i < len(parts); i++ {
+							*v += " && "
+							part := parts[i]
+							handleValidatePart(v, part, parent+"."+capWord(toUnderscore(key))+"[i]")
+						}
+						if len(parts) > 1 {
+							*v += "\n\t}\n"
+						}
+						// Type Part
+						*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + fieldType + " `json:\"" + key + "\"`\n"
+					}
 				case map[string]interface{}:
 					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []"
 					recurValidate(&val1, s, v, level+1, parent+"."+capWord(toUnderscore(key)))
@@ -119,21 +151,30 @@ func handleValidatePart(v *string, part string, vari string) {
 	skipNo := 0
 	if strings.HasPrefix(part, "gt=") {
 		skipNo = 3
-		*v += "gt(" + vari + ", " + part[skipNo:] + ")"
+		*v += "gt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lt=") {
 		skipNo = 3
-		*v += "lt(" + vari + ", " + part[skipNo:] + ")"
+		*v += "lt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "eq=") {
 		skipNo = 3
-		*v += "eq(" + vari + ", " + part[skipNo:] + ")"
+		*v += "eq(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "neq=") {
+		skipNo = 4
+		*v += "neq(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lengt=") {
 		skipNo = 6
-		*v += "lengt(len(" + vari + "), " + part[skipNo:] + ")"
+		*v += "lengt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lenlt=") {
 		skipNo = 6
-		*v += "lenlt(len(" + vari + "), " + part[skipNo:] + ")"
-	} else if strings.HasPrefix(part, "len=") {
+		*v += "lenlt(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "leneq=") {
+		skipNo = 6
+		*v += "leneq(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lenneq=") {
+		skipNo = 7
+		*v += "lenneq(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "req=") {
 		skipNo = 4
-		*v += "len(len(" + vari + "), " + part[skipNo:] + ")"
+		*v += "req(q" + vari + ", " + part[skipNo:] + ")"
 	}
 }

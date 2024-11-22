@@ -21,8 +21,8 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 		case string:
 			var fieldType string
 			var min, max ,length int
-			var startStr, endStr, containsStr string
-			minProvided, maxProvided, lengthProvided, startStrProvided, endStrProvided, containsStrProvided   := false, false, false, false, false, false
+			var startStr, endStr, containsStr, regexPattern string
+			minProvided, maxProvided, lengthProvided, startStrProvided, endStrProvided, containsStrProvided, regexProvided   := false, false, false, false, false, false, false
 
 			parts := strings.Fields(val)
 			fieldType = parts[0]
@@ -46,6 +46,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 			}else if strings.HasPrefix(part, "contains=") {
 				fmt.Sscanf(part, "contains=%s", &containsStr)
 				containsStrProvided = true
+			}else if strings.HasPrefix(part, "regex=") {
+				fmt.Sscanf(part, "regex=%s", &regexPattern)
+				regexProvided = true
 			}
 			}
 			structDef += fmt.Sprintf("\t%s %s `json:\"%s\"`\n", capitalizeFirstLetter(key), fieldType, key)
@@ -71,6 +74,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 				if containsStrProvided{
 					validationLogic += fmt.Sprintf("constr(%s, %s) && ", fieldPath, containsStr)
 				}
+				if regexProvided {
+                    validationLogic += fmt.Sprintf("reg(%s, \"%s\") && ", fieldPath, regexPattern)
+                }
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)
 				}

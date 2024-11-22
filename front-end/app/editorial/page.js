@@ -1,9 +1,15 @@
 "use client";
-import React, { useState } from "react";
-import Editor from "@monaco-editor/react";
+import React, { useState,useEffect } from "react";
+
 import toast from "react-hot-toast";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 const Page = () => {
+    const [domLoaded, setDomLoaded] = useState(false);
+    useEffect(() => {
+        setDomLoaded(true);
+      }, []);
   const [selectedOption, setSelectedOption] = useState("GET");
   const [typeName, setInputValue] = useState("");
   const [requestJSON, setRequestJSON] = useState(`{
@@ -14,79 +20,83 @@ const Page = () => {
       "Authorization": "Bearer token"
     }
   }`);
-  const [requestJSON1,setRequestJSON1]=useState("")
+  const [requestJSON1, setRequestJSON1] = useState("");
 
-  const [responseJSON, setResponseJSON] = useState(""); 
+  const [responseJSON, setResponseJSON] = useState("");
 
-  
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
   };
 
-  
   const handleChange1 = (event) => {
     setInputValue(event.target.value);
   };
 
- 
   const handleEditorChange = (value, event) => {
-    setRequestJSON(value); 
+    setRequestJSON(value);
   };
-  const handleEditorChange1=(value,event)=>{
+  const handleEditorChange1 = (value, event) => {
     setRequestJSON1(value);
-  }
+  };
 
-  
   const handleClick = async () => {
-    
-
     try {
-  
       const response = await apireq();
 
-     
-      setResponseJSON(JSON.stringify(response, null, 2)); 
+      setResponseJSON(JSON.stringify(response, null, 2));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-
   const apireq = async () => {
-    
-    const data={typeName,reqbody:JSON.parse(requestJSON),resbody:JSON.parse(requestJSON1)};
+    const reqbody = validateJSON(requestJSON);
+    const resbody = validateJSON(requestJSON1);
+  
+    const data = {
+      typeName,
+      reqbody,
+      resbody,
+    };
+  
     console.log(data);
+  
     try {
-        const response = await fetch(`https://31f8-115-99-94-143.ngrok-free.app/create-route`, {
+      const response = await fetch(
+        `https://31f8-115-99-94-143.ngrok-free.app/create-route`,
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(data),
-        });
-  
-        if (!response.ok) {
-          
-          toast.error("Error creating API");
-          throw new Error(`HTTP error! status: ${response.status}`);
         }
+      );
   
-        const result = await response.json();
-        console.log("Succesfull", result);
-        if (result.data==="Hello Tiger!") {
-          console.log("Done");
-          toast.success("New API created");
-        }
-        setResponseJSON(JSON.stringify(result, null, 2)); 
-      } catch (error) {
+      if (!response.ok) {
         toast.error("Error creating API");
-        console.error("Error posting data:", error);
-        setResponseJSON("Invalid JSON response or server error. Check console logs.");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+  
+      const result = await response.json();
+      console.log("Successful", result);
+  
+      if (result.data === "Hello Tiger!") {
+        console.log("Done");
+        toast.success("New API created");
+      }
+  
+      setResponseJSON(JSON.stringify(result, null, 2));
+    } catch (error) {
+      toast.error("Error creating API");
+      console.error("Error posting data:", error);
+      setResponseJSON(
+        "Invalid JSON response or server error. Check console logs."
+      );
+    }
   };
   
 
-  
   function handleEditorDidMount(editor, monaco) {
     console.log("Editor Instance:", editor);
     console.log("Monaco Instance:", monaco);
@@ -103,14 +113,14 @@ const Page = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#1e1e1e] pb-[50px]">
+    <div className="h-full flex flex-col bg-[#1e1e1e] pb-[50px] pt-4">
       <div className="flex ">
         <div className="flex gap-1 border-gray-700 p-[5px] border-[1px] rounded-sm m-[20px] divide-x">
           <div className="border-none ">
             <select
               value={selectedOption}
               onChange={handleChange}
-              className="h-[35px] border-none bg-[#1e1e1e] font-bold px-[15px]"
+              className="h-[35px] border-none bg-[#1e1e1e] font-bold px-[15px] "
             >
               <option value="get">GET</option>
               <option value="Post">POST</option>
@@ -141,26 +151,31 @@ const Page = () => {
       </div>
 
       <div className="w-[full] mx-[20px] border-[1px] border-gray-700 rounded-sm">
+        {domLoaded &&(
         <Editor
           height="38vh"
           value={requestJSON}
           language="json"
           theme="vs-dark"
-          onChange={handleEditorChange} 
+          onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           beforeMount={handleEditorWillMount}
           onValidate={handleEditorValidation}
+        
         />
+        )}
       </div>
 
-      <div className="font-semibold py-[10px] text-sm text-white ml-[20px]">Response</div>
+      <div className="font-semibold py-[10px] text-sm text-white ml-[42px]">
+        Response
+      </div>
       <div className="w-[full] mx-[20px] border-[1px] border-gray-700 rounded-sm">
         <Editor
           height="38vh"
           value={responseJSON}
           language="json"
           theme="vs-dark"
-          onChange={handleEditorChange1} 
+          onChange={handleEditorChange1}
           onMount={handleEditorDidMount}
           beforeMount={handleEditorWillMount}
           onValidate={handleEditorValidation}

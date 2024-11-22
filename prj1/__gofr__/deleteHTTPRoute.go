@@ -17,7 +17,7 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	f, _ := ctx.File.Open(fileName)
 	if f == nil {
 		retType.IsDone = false
-		retType.Message = "Route does not already exist!"
+		retType.Message = "Route does not exist!"
 		ctx.Logger.Info(retType.Message)
 		return retType, nil
 	}

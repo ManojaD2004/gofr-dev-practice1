@@ -12,6 +12,11 @@ type DeleteRouteType struct {
 	Method string `json"method"`
 }
 
+type GetRouteType struct {
+	RouteName   string `json:"routeName"`
+	Method string `json"method"`
+}
+
 type NewType struct {
 	TypeName string                 `json:"typeName"`
 	TypeBody map[string]interface{} `json:"typeBody"`

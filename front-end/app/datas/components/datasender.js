@@ -26,11 +26,7 @@ const Datasender = () => {
   const [dropdownSelection, setDropdownSelection] = useState("");
   const [requestJSON, setRequestJSON] = useState(`{
         "name": "John Doe",
-        "requestType": "GET",
-        "endpoint": "/api/example",
-        "headers": {
-          "Authorization": "Bearer token"
-        }
+        "requestType": "GET"
       }`);
   const [typeName, setTypeName] = useState("");
 

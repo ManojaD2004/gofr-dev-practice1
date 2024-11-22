@@ -3,12 +3,13 @@ package __gofr__
 import (
 	"encoding/json"
 	"fmt"
+
 	"gofr.dev/pkg/gofr"
 )
 
 func DeleteTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	delType := DeleteType{}
-	retType := ReturnNewType{}
+	retType := ReturnType{}
 	ctx.Bind(&delType)
 	ctx.File.ChDir("./types")
 	fileName := delType.TypeName + ".go"

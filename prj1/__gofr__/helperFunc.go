@@ -13,16 +13,10 @@ func capWord(s string) string {
 	return strings.ToUpper(string(s[0])) + s[1:]
 }
 
-func smallFirstLetter(s string) string {
-	if len(s) == 0 {
-		return s
-	}
-	return strings.ToLower(string(s[0])) + s[1:]
-}
-
 func toUnderscore(input string) string {
 	result := strings.ReplaceAll(input, "-", "_")
 	result = strings.ReplaceAll(result, " ", "_")
+	result = strings.ReplaceAll(result, "/", "_")
 	return result
 }
 
@@ -54,4 +48,19 @@ func recur(m *map[string]interface{}, s *string, level int) {
 		}
 	}
 	*s += strings.Repeat("\t", level-1) + "}"
+}
+
+func convertStructToMap(input interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	val := reflect.ValueOf(input)
+	typ := reflect.TypeOf(input)
+	if val.Kind() != reflect.Struct {
+		panic("input must be a struct")
+	}
+	for i := 0; i < val.NumField(); i++ {
+		fieldName := typ.Field(i).Name
+		fieldValue := val.Field(i).Interface()
+		result[fieldName] = fieldValue
+	}
+	return result
 }

@@ -6,7 +6,7 @@ import (
 
 func GetTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	getType := GetType{}
-	retType := ReturnNewType{}
+	retType := ReturnType{}
 	ctx.Bind(&getType)
 	ctx.File.ChDir("./types")
 	fileName := getType.TypeName + ".go"

@@ -1,9 +1,10 @@
 package __gofr__
 
-type RouteType struct {
-	TypeName string      `json:"typeName"`
-	ReqBody  interface{} `json:"reqBody"`
-	ResBody  interface{} `json:"resBody"`
+type CreateRouteType struct {
+	RouteName   string `json:"routeName"`
+	Method string `json"method"`
+	ReqBodyType string `json:"reqBodyType"`
+	ResBodyType string `json:"resBodyType"`
 }
 
 type NewType struct {
@@ -19,8 +20,8 @@ type GetType struct {
 	TypeName string `json:"typeName"`
 }
 
-type ReturnNewType struct {
-	IsDone  bool   `json:"isDone"`
+type ReturnType struct {
+	IsDone  bool        `json:"isDone"`
 	Message interface{} `json:"message"`
 }
 

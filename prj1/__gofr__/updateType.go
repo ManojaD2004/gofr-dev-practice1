@@ -7,7 +7,7 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
-func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
+func UpdateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	newType := NewType{}
 	retType := ReturnType{}
 	ctx.Bind(&newType)
@@ -19,9 +19,9 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./types")
 	fileName := typeName1 + ".go"
 	f, _ := ctx.File.Open(fileName)
-	if f != nil {
-		ctx.Logger.Info("Type/File already exist")
-		retType.Message = "type/file already exist"
+	if f == nil {
+		ctx.Logger.Info("Type/File does not exist")
+		retType.Message = "type/file does not exist"
 		retType.IsDone = false
 		return retType, nil
 	}
@@ -30,7 +30,7 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	f.Close()
 	ctx.File.ChDir("..")
 	fmt.Println("Total bytes written: ", n)
-	retType.Message = newType.TypeName + " type created, and type file " + fileName + " created!"
+	retType.Message = newType.TypeName + " type created, and type file " + fileName + " was updated!"
 	retType.IsDone = true
 	ctx.File.ChDir("./__gofr__")
 	f, err := ctx.File.Open("metadata.json")

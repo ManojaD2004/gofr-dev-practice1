@@ -20,6 +20,7 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	fileName := typeName1 + ".go"
 	f, _ := ctx.File.Open(fileName)
 	if f != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Type/File already exist")
 		retType.Message = "type/file already exist"
 		retType.IsDone = false
@@ -35,6 +36,7 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err := ctx.File.Open("metadata.json")
 	if err != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"
 		retType.IsDone = false
@@ -49,6 +51,7 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	mdt.Types[newType.TypeName] = newType.TypeBody
 	s1, err := json.Marshal(mdt)
 	if err != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error converting JSON Object")
 		retType.Message = "Error converting JSON Object"
 		retType.IsDone = false

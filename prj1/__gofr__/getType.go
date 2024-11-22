@@ -12,6 +12,7 @@ func GetTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	fileName := getType.TypeName + ".go"
 	f, _ := ctx.File.Open(fileName)
 	if f == nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Type/File does not exist")
 		retType.Message = "type/file does not exist"
 		retType.IsDone = false
@@ -22,6 +23,7 @@ func GetTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err := ctx.File.Open("metadata.json")
 	if err != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"
 		retType.IsDone = false
@@ -42,6 +44,7 @@ func GetAllTypesRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err := ctx.File.Open("metadata.json")
 	if err != nil {
+		ctx.File.ChDir("..")
 		retType := ReturnType{}
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"

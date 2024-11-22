@@ -16,6 +16,7 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	fileName := capWord(toUnderscore(delRoute.RouteName[1:])) + delRoute.Method + ".go"
 	f, _ := ctx.File.Open(fileName)
 	if f == nil {
+		ctx.File.ChDir("..")
 		retType.IsDone = false
 		retType.Message = "Route does not exist!"
 		ctx.Logger.Info(retType.Message)
@@ -43,6 +44,7 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err1 := ctx.File.Open("metadata.json")
 	if err1 != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"
 		retType.IsDone = false
@@ -56,6 +58,7 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	delete(mdt.Routes, delRoute.RouteName+"_"+delRoute.Method)
 	s1, err := json.Marshal(mdt)
 	if err != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error converting JSON Object")
 		retType.Message = "Error converting JSON Object"
 		retType.IsDone = false

@@ -13,6 +13,7 @@ func GetHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	fileName := capWord(toUnderscore(getRoute.RouteName[1:])) + getRoute.Method + ".go"
 	f, _ := ctx.File.Open(fileName)
 	if f == nil {
+		ctx.File.ChDir("..")
 		retType.IsDone = false
 		retType.Message = "Route does not exist!"
 		ctx.Logger.Info(retType.Message)
@@ -23,6 +24,7 @@ func GetHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err1 := ctx.File.Open("metadata.json")
 	if err1 != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"
 		retType.IsDone = false
@@ -45,6 +47,7 @@ func GetAllHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err1 := ctx.File.Open("metadata.json")
 	if err1 != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType := ReturnType{}
 		retType.Message = "Error opening JSON Object"

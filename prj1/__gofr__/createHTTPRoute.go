@@ -14,6 +14,9 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	f, _ := ctx.File.Open("./go.mod")
 	reader1, err1 := f.ReadAll()
 	if err1 != nil {
+		ctx.File.ChDir("..")
+		retType.IsDone = false
+		retType.Message = "Cannot open ./go.mod file!"
 		return nil, err1
 	}
 	s := ""
@@ -38,6 +41,7 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	fileName := capWord(toUnderscore(newRoute.RouteName[1:])) + newRoute.Method + ".go"
 	f1, _ := ctx.File.Open(fileName)
 	if f1 != nil {
+		ctx.File.ChDir("..")
 		retType.IsDone = false
 		retType.Message = "Route already exist!"
 		ctx.Logger.Info(retType.Message)
@@ -67,6 +71,7 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./__gofr__")
 	f, err1 = ctx.File.Open("metadata.json")
 	if err1 != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error opening JSON Object")
 		retType.Message = "Error opening JSON Object"
 		retType.IsDone = false
@@ -81,6 +86,7 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	mdt.Routes[newRoute.RouteName+"_"+newRoute.Method] = convertStructToMap(newRoute)
 	s1, err := json.Marshal(mdt)
 	if err != nil {
+		ctx.File.ChDir("..")
 		ctx.Logger.Info("Error converting JSON Object")
 		retType.Message = "Error converting JSON Object"
 		retType.IsDone = false

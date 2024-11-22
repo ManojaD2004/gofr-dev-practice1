@@ -12,7 +12,6 @@ func capitalizeFirstLetter(s string) string {
 	}
 	return strings.ToUpper(string(s[0])) + s[1:]
 }
-
 func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *string, parent string) {
 	structDef := "type " + capitalizeFirstLetter(key1) + "Type struct {\n"
 	validationLogic := ""
@@ -21,8 +20,8 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 		switch val := value.(type) {
 		case string:
 			var fieldType string
-			var min, max int
-			minProvided, maxProvided := false, false
+			var min, max ,length int
+			minProvided, maxProvided, lengthProvided  := false, false, false
 
 			parts := strings.Fields(val)
 			fieldType = parts[0]
@@ -34,21 +33,30 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 				} else if strings.HasPrefix(part, "max=") {
 					fmt.Sscanf(part, "max=%d", &max)
 					maxProvided = true
-				}
+				}else if strings.HasPrefix(part, "length=") {
+					fmt.Sscanf(part, "length=%d", &length)
+					lengthProvided = true
+			}
 			}
 			structDef += fmt.Sprintf("\t%s %s `json:\"%s\"`\n", capitalizeFirstLetter(key), fieldType, key)
 			fieldPath := parent + capitalizeFirstLetter(key)
 			if fieldType == "string" {
-				if minProvided {
-					validationLogic += fmt.Sprintf("gt(len(%s), %d) && ", fieldPath, min)
-				}
-				if maxProvided {
-					validationLogic += fmt.Sprintf("lt(len(%s), %d) && ", fieldPath, max)
+				if lengthProvided {
+					validationLogic += fmt.Sprintf("len(%s) == %d && ", fieldPath, length)
+				} else{
+					if minProvided {
+						validationLogic += fmt.Sprintf("gt(len(%s), %d) && ", fieldPath, min)
+					}
+					if maxProvided {
+						validationLogic += fmt.Sprintf("lt(len(%s), %d) && ", fieldPath, max)
+					}
+					
 				}
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)
 				}
-			} else {
+			
+				} else {
 				if minProvided {
 					validationLogic += fmt.Sprintf("gt(%s, %d) && ", fieldPath, min)
 				}
@@ -69,7 +77,6 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 	*s = structDef + *s
 	*validateLogic += validationLogic
 }
-
 func main() {
 	Schema := `{
 		"empName": "string min=5 max=50",

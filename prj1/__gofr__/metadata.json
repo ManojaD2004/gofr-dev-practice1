@@ -1,4 +1,1 @@
-{
-    "types": {},
-    "routes": {}
-}
+{"types":{"user2":{"class":{"class 1":["string"],"class2":"string","more-Class":[{"class3":"string","school4":[{"class5":"string"}]}]},"phoneNo":"int","userName":"string"}},"routes":{}}

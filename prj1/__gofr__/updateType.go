@@ -30,7 +30,7 @@ func UpdateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	f.Close()
 	ctx.File.ChDir("..")
 	fmt.Println("Total bytes written: ", n)
-	retType.Message = newType.TypeName + " type created, and type file " + fileName + " was updated!"
+	retType.Message = newType.TypeName + " type update, and type file " + fileName + " was updated!"
 	retType.IsDone = true
 	ctx.File.ChDir("./__gofr__")
 	f, err := ctx.File.Open("metadata.json")

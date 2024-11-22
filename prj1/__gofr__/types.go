@@ -1,6 +1,6 @@
 package __gofr__
 
-type CreateRouteType struct {
+type NewRouteType struct {
 	RouteName   string `json:"routeName"`
 	Method string `json"method"`
 	ReqBodyType string `json:"reqBodyType"`

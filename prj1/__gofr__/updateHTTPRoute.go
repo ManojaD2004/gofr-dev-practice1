@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
+func UpdateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	newRoute := NewRouteType{}
 	ctx.Bind(&newRoute)
 	retType := ReturnType{}
@@ -40,10 +40,10 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("./route")
 	fileName := capWord(toUnderscore(newRoute.RouteName[1:])) + newRoute.Method + ".go"
 	f1, _ := ctx.File.Open(fileName)
-	if f1 != nil {
+	if f1 == nil {
 		ctx.File.ChDir("..")
 		retType.IsDone = false
-		retType.Message = "Route already exist!"
+		retType.Message = "Route does not exist!"
 		ctx.Logger.Info(retType.Message)
 		return retType, nil
 	}
@@ -52,21 +52,7 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	f.Close()
 	fmt.Println("Total bytes written: ", n)
 	ctx.File.ChDir("..")
-	f, _ = ctx.File.Open("main.go")
-	tempS := ""
-	reader1, _ = f.ReadAll()
-	for reader1.Next() {
-		var b string
-		reader1.Scan(&b)
-		tempS += b + "\n"
-	}
-	newStr := strings.Replace(tempS, "// register routes", "// register routes\n\t"+"app."+newRoute.Method+"(\""+newRoute.RouteName+"\", r."+capWord(funcName)+")", 1)
-	f.Close()
-	f, _ = ctx.File.Create("main.go")
-	n, _ = f.Write([]byte(newStr))
-	f.Close()
-	fmt.Println("Total bytes written: ", n)
-	retType.Message = newRoute.RouteName + " route of " + newRoute.Method + " created, and file " + fileName + " created!"
+	retType.Message = newRoute.RouteName + " route of " + newRoute.Method + " update, and file " + fileName + " update!"
 	retType.IsDone = true
 	ctx.File.ChDir("./__gofr__")
 	f, err1 = ctx.File.Open("metadata.json")

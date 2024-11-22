@@ -10,6 +10,7 @@ func main() {
 	// initialise gofr object
 	app := gofr.New()
 	// register routes
+	app.DELETE("/user2", r.User2DELETEHandler)
 	app.GET("/greet", r.GreetRouteGET)
 	// HTTP Routes Handler
 	app.POST("/.__gofr__/delete-route", __gofr__.DeleteHTTPRoute)

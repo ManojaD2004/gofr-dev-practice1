@@ -21,8 +21,8 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 		case string:
 			var fieldType string
 			var min, max ,length int
-			var startStr, endStr string
-			minProvided, maxProvided, lengthProvided, startStrProvided, endStrProvided   := false, false, false, false, false
+			var startStr, endStr, containsStr string
+			minProvided, maxProvided, lengthProvided, startStrProvided, endStrProvided, containsStrProvided   := false, false, false, false, false, false
 
 			parts := strings.Fields(val)
 			fieldType = parts[0]
@@ -43,6 +43,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 			}else if strings.HasPrefix(part, "startswith=") {
 				fmt.Sscanf(part, "startswith=%s", &endStr)
 				endStrProvided  = true
+			}else if strings.HasPrefix(part, "contains=") {
+				fmt.Sscanf(part, "contains=%s", &containsStr)
+				containsStrProvided = true
 			}
 			}
 			structDef += fmt.Sprintf("\t%s %s `json:\"%s\"`\n", capitalizeFirstLetter(key), fieldType, key)
@@ -64,6 +67,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 				}
 				if endStrProvided{
 					validationLogic += fmt.Sprintf("endstr(%s, %s) && ", fieldPath, endStr)
+				}
+				if containsStrProvided{
+					validationLogic += fmt.Sprintf("constr(%s, %s) && ", fieldPath, containsStr)
 				}
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)

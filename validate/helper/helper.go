@@ -19,6 +19,9 @@ func validateEmail(email string) bool {
 func ststr(str, prefix string) bool {
     return strings.HasPrefix(str, prefix)
 }
-func endstr(str, prefix string) bool {
-    return strings.HasSuffix(str, prefix)
+func endstr(str, suffix string) bool {
+    return strings.HasSuffix(str, suffix)
+}
+func constr(str, substr string) bool {
+    return strings.Contains(str, substr)
 }

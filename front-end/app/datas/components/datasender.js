@@ -24,10 +24,7 @@ const Datasender = () => {
   const [domLoaded, setDomLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dropdownSelection, setDropdownSelection] = useState("");
-  const [requestJSON, setRequestJSON] = useState(`{
-        "name": "John Doe",
-        "requestType": "GET"
-      }`);
+  const [requestJSON, setRequestJSON] = useState("");
   const [typeName, setTypeName] = useState("");
 
   useEffect(() => {
@@ -79,7 +76,7 @@ const Datasender = () => {
     return { isValid: true, message: "All data types are valid." };
   }
 
-  const  handleSend = async () => {
+  const handleSend = async () => {
     try {
       if (!typeName) {
         toast.error("Please enter a type name");
@@ -89,7 +86,7 @@ const Datasender = () => {
         toast.error("Please select a dropdown option");
         return;
       }
-     
+
       const parsedJSON = JSON.parse(requestJSON);
       const validationResult = validateDataType(parsedJSON);
 
@@ -105,23 +102,20 @@ const Datasender = () => {
       };
 
       console.log("Send Data:", data);
-    
-      const response = await fetch(
-        ``,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-  
+
+      const response = await fetch(``, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
       if (!response.ok) {
         toast.error("Error creating API");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const result = await response.json();
       console.log("Successful", result);
       toast.success("Data is valid and sent!");
@@ -158,21 +152,25 @@ const Datasender = () => {
               <DropdownMenuContent className="bg-[#1e1e1e] text-white rounded shadow-lg border border-gray-700 w-48 z-50 font-semibold">
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
-                  onClick={() => setDropdownSelection("GET")}
+                  onClick={() => {
+                    setDropdownSelection("GET");
+                    setRequestJSON("");
+                  }}
                 >
                   GET
                   <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
-                  onClick={() => setDropdownSelection("POST")}
+                  onClick={() => setDropdownSelection("CREATE")}
                 >
-                  POST
-                  <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                  CREATE
+                  <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                 </DropdownMenuItem>
+
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
-                  onClick={() => setDropdownSelection("DELETE")}
+                  onClick={() => {setDropdownSelection("DELETE"); setRequestJSON("")}}
                 >
                   DELETE
                   <DropdownMenuShortcut>⇧⌘D</DropdownMenuShortcut>
@@ -199,7 +197,10 @@ const Datasender = () => {
 
       <div className="px-8 bg-[#1e1e1e] border-[#6b6b6b] ">
         {domLoaded && (
-          <div style={{ height: "75vh" }} className="border-[#6b6b6b] border-[1px]">
+          <div
+            style={{ height: "75vh" }}
+            className="border-[#6b6b6b] border-[1px]"
+          >
             <Editor
               height="70vh"
               value={requestJSON}

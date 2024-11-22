@@ -14,3 +14,7 @@ type User2Type struct {
 	UserName string `json:"userName"`
 	PhoneNo int `json:"phoneNo"`
 }
+
+func (q *User2Type) Validate() bool {
+	return q.PhoneNo == 00
+}

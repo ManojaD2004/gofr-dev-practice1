@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -20,76 +20,76 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 		switch val := value.(type) {
 		case string:
 			var fieldType string
-			var min, max ,length int
+			var gt, lt, length int
 			var startStr, endStr, containsStr, regexPattern string
-			minProvided, maxProvided, lengthProvided, startStrProvided, endStrProvided, containsStrProvided, regexProvided   := false, false, false, false, false, false, false
+			gtProvided, ltProvided, lengthProvided, startStrProvided, endStrProvided, containsStrProvided, regexProvided := false, false, false, false, false, false, false
 
 			parts := strings.Fields(val)
 			fieldType = parts[0]
 
 			for _, part := range parts[1:] {
-				if strings.HasPrefix(part, "min=") {
-					fmt.Sscanf(part, "min=%d", &min)
-					minProvided = true
-				} else if strings.HasPrefix(part, "max=") {
-					fmt.Sscanf(part, "max=%d", &max)
-					maxProvided = true
-				}else if strings.HasPrefix(part, "length=") {
+				if strings.HasPrefix(part, "gt=") {
+					fmt.Sscanf(part, "gt=%d", &gt)
+					gtProvided = true
+				} else if strings.HasPrefix(part, "lt=") {
+					fmt.Sscanf(part, "lt=%d", &lt)
+					ltProvided = true
+				} else if strings.HasPrefix(part, "length=") {
 					fmt.Sscanf(part, "length=%d", &length)
 					lengthProvided = true
-			}else if strings.HasPrefix(part, "startswith=") {
-				fmt.Sscanf(part, "startswith=%s", &startStr)
-				startStrProvided  = true
-			}else if strings.HasPrefix(part, "startswith=") {
-				fmt.Sscanf(part, "startswith=%s", &endStr)
-				endStrProvided  = true
-			}else if strings.HasPrefix(part, "contains=") {
-				fmt.Sscanf(part, "contains=%s", &containsStr)
-				containsStrProvided = true
-			}else if strings.HasPrefix(part, "regex=") {
-				fmt.Sscanf(part, "regex=%s", &regexPattern)
-				regexProvided = true
-			}
+				} else if strings.HasPrefix(part, "startswith=") {
+					fmt.Sscanf(part, "startswith=%s", &startStr)
+					startStrProvided = true
+				} else if strings.HasPrefix(part, "startswith=") {
+					fmt.Sscanf(part, "startswith=%s", &endStr)
+					endStrProvided = true
+				} else if strings.HasPrefix(part, "contains=") {
+					fmt.Sscanf(part, "contains=%s", &containsStr)
+					containsStrProvided = true
+				} else if strings.HasPrefix(part, "regex=") {
+					fmt.Sscanf(part, "regex=%s", &regexPattern)
+					regexProvided = true
+				}
 			}
 			structDef += fmt.Sprintf("\t%s %s `json:\"%s\"`\n", capitalizeFirstLetter(key), fieldType, key)
 			fieldPath := parent + capitalizeFirstLetter(key)
 			if fieldType == "string" {
 				if lengthProvided {
 					validationLogic += fmt.Sprintf("len(%s) == %d && ", fieldPath, length)
-				} else{
-					if minProvided {
-						validationLogic += fmt.Sprintf("gt(len(%s), %d) && ", fieldPath, min)
+				} else {
+					if gtProvided {
+						validationLogic += fmt.Sprintf("gt(len(%s), %d) && ", fieldPath, gt)
 					}
-					if maxProvided {
-						validationLogic += fmt.Sprintf("lt(len(%s), %d) && ", fieldPath, max)
+					if ltProvided {
+						validationLogic += fmt.Sprintf("lt(len(%s), %d) && ", fieldPath, lt)
 					}
-					
+
 				}
-				if startStrProvided{
+				if startStrProvided {
 					validationLogic += fmt.Sprintf("ststr(%s, %s) && ", fieldPath, startStr)
 				}
-				if endStrProvided{
+				if endStrProvided {
 					validationLogic += fmt.Sprintf("endstr(%s, %s) && ", fieldPath, endStr)
 				}
-				if containsStrProvided{
+				if containsStrProvided {
 					validationLogic += fmt.Sprintf("constr(%s, %s) && ", fieldPath, containsStr)
 				}
 				if regexProvided {
-                    validationLogic += fmt.Sprintf("reg(%s, \"%s\") && ", fieldPath, regexPattern)
-                }
+					validationLogic += fmt.Sprintf("reg(%s, \"%s\") && ", fieldPath, regexPattern)
+				}
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)
 				}
 				if key == "url" {
 					validationLogic += fmt.Sprintf("url(%s) && ", fieldPath)
 				}
-			
-				} else {
-				if minProvided {
-					validationLogic += fmt.Sprintf("gt(%s, %d) && ", fieldPath, min)
+
+			} else {
+				if gtProvided {
+					validationLogic += fmt.Sprintf("gt(%s, %d) && ", fieldPath, gt)
 				}
-				if maxProvided {
-					validationLogic += fmt.Sprintf("lt(%s, %d) && ", fieldPath, max)
+				if ltProvided {
+					validationLogic += fmt.Sprintf("lt(%s, %d) && ", fieldPath, lt)
 				}
 			}
 
@@ -107,22 +107,22 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 }
 func main() {
 	Schema := `{
-		"empName": "string min=5 max=50",
-		"id": "int min=1 max=100",
-		"email": "string min=10 max=100",
+		"empName": "string gt=5 lt=50",
+		"id": "int gt=1 lt=100",
+		"email": "string gt=10 lt=100",
 		"address": {
-		  "street": "string min=10 max=100",
-		  "city": "string min=3 max=50",
-		  "zip": "int max=9999",
+		  "street": "string gt=10 lt=100",
+		  "city": "string gt=3 lt=50",
+		  "zip": "int lt=9999",
 		  "country": {
-			"name": "string min=3 max=50",
-			"code": "string min=2 max=10"
+			"name": "string gt=3 lt=50",
+			"code": "string gt=2 lt=10"
 		  }
 		},
 		"preferences": {
-		  "theme": "string min=3 max=20",
+		  "theme": "string gt=3 lt=20",
 		  "notificationsEnabled": "bool",
-		  "language": "string min=2 max=10"
+		  "language": "string gt=2 lt=10"
 		}
 	  }`
 	var schema map[string]interface{}

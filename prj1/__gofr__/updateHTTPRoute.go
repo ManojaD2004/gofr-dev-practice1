@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gofr.dev/pkg/gofr"
-	"strings"
 )
 
 func UpdateHTTPRoute(ctx *gofr.Context) (interface{}, error) {

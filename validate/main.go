@@ -63,7 +63,7 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 					validationLogic += fmt.Sprintf("ststr(%s, %s) && ", fieldPath, startStr)
 				}
 				if endStrProvided{
-					validationLogic += fmt.Sprintf("ststr(%s, %s) && ", fieldPath, endStr)
+					validationLogic += fmt.Sprintf("endstr(%s, %s) && ", fieldPath, endStr)
 				}
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)

@@ -1,5 +1,5 @@
 package types
 
 type IsDoneType struct {
-	IsCreated bool `json:"isCreated"`
+	IsCreated int `json:"isCreated"`
 }

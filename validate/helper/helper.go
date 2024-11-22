@@ -25,3 +25,8 @@ func endstr(str, suffix string) bool {
 func constr(str, substr string) bool {
     return strings.Contains(str, substr)
 }
+func isValidURL(str string) bool {
+	re := `^https?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$`
+	r := regexp.MustCompile(re)
+	return r.MatchString(str)
+}

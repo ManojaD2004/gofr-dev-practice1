@@ -74,6 +74,9 @@ func recur(m *map[string]interface{}, key1 string, s *string, validateLogic *str
 				if key == "email" {
 					validationLogic += fmt.Sprintf("em(%s) && ", fieldPath)
 				}
+				if key == "url" {
+					validationLogic += fmt.Sprintf("url(%s) && ", fieldPath)
+				}
 			
 				} else {
 				if minProvided {

@@ -83,7 +83,7 @@ const Datasender = () => {
     return { isValid: true, message: "All data types are valid." };
   }
 
-  const handleSend = () => {
+  const  handleSend = async () => {
     try {
       if (!typeName) {
         toast.error("Please enter a type name");
@@ -109,6 +109,25 @@ const Datasender = () => {
       };
 
       console.log("Send Data:", data);
+    
+      const response = await fetch(
+        ``,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+  
+      if (!response.ok) {
+        toast.error("Error creating API");
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log("Successful", result);
       toast.success("Data is valid and sent!");
     } catch (error) {
       toast.error("Invalid JSON format.");

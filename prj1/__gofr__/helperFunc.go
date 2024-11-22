@@ -31,24 +31,18 @@ func recur(m *map[string]interface{}, s *string, level int) {
 	for key, value := range *m {
 		switch val := value.(type) {
 		case string:
-			*s = *s + strings.Repeat("\t", level) + capWord(key) + " " + val + " `json:\"" + key + "\"`\n"
-			// fmt.Println(key1, key, val, s)
+			*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " " + val + " `json:\"" + key + "\"`\n"
 		case map[string]interface{}:
-			// fmt.Println(key1, key, val)
-			newType := capWord(key)
-			*s = *s + strings.Repeat("\t", level) + newType + " "
+			*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " "
 			recur(&val, s, level+1)
 			*s = *s + " `json:\"" + key + "\"`\n"
 		case []interface{}:
 			if len(val) == 1 {
 				switch val1 := val[0].(type) {
 				case string:
-					*s = *s + strings.Repeat("\t", level) + capWord(key) + " []" + val1 + " `json:\"" + key + "\"`\n"
-					// fmt.Println("Array of string")
+					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + val1 + " `json:\"" + key + "\"`\n"
 				case map[string]interface{}:
-					// fmt.Println("Array of object")
-					newType := capWord(key)
-					*s = *s + strings.Repeat("\t", level) + newType + " []"
+					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []"
 					recur(&val1, s, level+1)
 					*s = *s + " `json:\"" + key + "\"`\n"
 				default:

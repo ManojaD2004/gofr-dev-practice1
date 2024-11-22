@@ -37,3 +37,23 @@ func GetTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	ctx.File.ChDir("..")
 	return retType, nil
 }
+
+func GetAllTypesRoute(ctx *gofr.Context) (interface{}, error) {
+	ctx.File.ChDir("./__gofr__")
+	f, err := ctx.File.Open("metadata.json")
+	if err != nil {
+		retType := ReturnType{}
+		ctx.Logger.Info("Error opening JSON Object")
+		retType.Message = "Error opening JSON Object"
+		retType.IsDone = false
+		return retType, nil
+	}
+	read, _ := f.ReadAll()
+	mdt := MetaDataType{}
+	for read.Next() {
+		read.Scan(&mdt)
+	}
+	ctx.File.ChDir("..")
+	ctx.Logger.Info("Sending All Types")
+	return mdt.Types, nil
+}

@@ -8,12 +8,12 @@ import (
 )
 
 func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
-	newRoute := CreateRouteType{}
-	ctx.Bind(&newRoute)
+	delRoute := DeleteRouteType{}
+	ctx.Bind(&delRoute)
 	retType := ReturnType{}
 	ctx.File.ChDir("./route")
-	funcName := toUnderscore(newRoute.RouteName[1:]) + newRoute.Method + "Handler"
-	fileName := capWord(toUnderscore(newRoute.RouteName[1:])) + newRoute.Method + ".go"
+	funcName := toUnderscore(delRoute.RouteName[1:]) + delRoute.Method + "Handler"
+	fileName := capWord(toUnderscore(delRoute.RouteName[1:])) + delRoute.Method + ".go"
 	f, _ := ctx.File.Open(fileName)
 	if f == nil {
 		retType.IsDone = false
@@ -32,13 +32,13 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 		reader1.Scan(&b)
 		tempS += b + "\n"
 	}
-	newStr := strings.Replace(tempS, "app."+newRoute.Method+"(\""+newRoute.RouteName+"\", r."+capWord(funcName)+")\n", "", 1)
+	newStr := strings.Replace(tempS, "app."+delRoute.Method+"(\""+delRoute.RouteName+"\", r."+capWord(funcName)+")\n\t", "", 1)
 	f.Close()
 	f, _ = ctx.File.Create("main.go")
 	n, _ := f.Write([]byte(newStr))
 	f.Close()
 	fmt.Println("Total bytes written: ", n)
-	retType.Message = newRoute.RouteName + " route of " + newRoute.Method + " deleted, and file " + fileName + " deleted!"
+	retType.Message = delRoute.RouteName + " route of " + delRoute.Method + " deleted, and file " + fileName + " deleted!"
 	retType.IsDone = true
 	ctx.File.ChDir("./__gofr__")
 	f, err1 := ctx.File.Open("metadata.json")
@@ -53,7 +53,7 @@ func DeleteHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	for read.Next() {
 		read.Scan(&mdt)
 	}
-	delete(mdt.Routes, newRoute.RouteName+"_"+newRoute.Method)
+	delete(mdt.Routes, delRoute.RouteName+"_"+delRoute.Method)
 	s1, err := json.Marshal(mdt)
 	if err != nil {
 		ctx.Logger.Info("Error converting JSON Object")

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CreateRoute(ctx *gofr.Context) (interface{}, error) {
+func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	newRoute := CreateRouteType{}
 	ctx.Bind(&newRoute)
 	retType := ReturnType{}

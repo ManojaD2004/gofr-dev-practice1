@@ -121,9 +121,9 @@ const Datasender = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen ">
+    <div className="bg-[#1e1e1e] min-h-screen ">
       <div className="h-[150px] flex items-center  px-8 text-white justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center border border-[#6b6b6b] ">
           <div className="border-r border-[#6b6b6b]">
             <input
               type="text"
@@ -182,11 +182,11 @@ const Datasender = () => {
         </button>
       </div>
 
-      <div className="px-8 bg-black">
+      <div className="px-8 bg-[#1e1e1e] border-[#6b6b6b] ">
         {domLoaded && (
-          <div style={{ height: "80vh" }}>
+          <div style={{ height: "75vh" }} className="border-[#6b6b6b] border-[1px]">
             <Editor
-              height="80vh"
+              height="70vh"
               value={requestJSON}
               language="json"
               theme="vs-dark"

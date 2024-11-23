@@ -5,8 +5,7 @@ import Home1 from "./components/Herosec";
 export default function Home() {
   return (
     <div>
-    
-      <Home1/>
+      <Home1 />
     </div>
   );
 }

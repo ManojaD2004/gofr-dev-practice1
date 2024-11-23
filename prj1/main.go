@@ -10,7 +10,6 @@ func main() {
 	// initialise gofr object
 	app := gofr.New()
 	// register routes
-	app.POST("/test123", r.Test123POSTHandler)
 	app.POST("/test", r.TestPOSTHandler)
 	
 	app.DELETE("/user2", r.User2DELETEHandler)

@@ -4,7 +4,7 @@ export const initialNodes = [
  
   {
    id: "1",
-    position: { x: 275, y: -100 },
+    position: { x: 0, y: -200 },
     data: {  },
     type: "dropdowntest",
   },
@@ -23,7 +23,7 @@ export const initialNodes = [
  {
    id: "4",
    data: { name: "Redis", code: "redis" },
-   position: { x: 550, y: 325 },
+   position: { x: 550, y: 300 },
    type: "databaseoptions",
  },
  {

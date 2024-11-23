@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useCallback } from "react";
 import ReactFlow, {
   ReactFlowProvider,
@@ -32,6 +32,14 @@ const Flowable = () => {
     setEdges((prevEdges) => addEdge(edge, prevEdges));
   }, []);
 
+  const handleInputChange = (id, value) => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, inputValue: value } } : node
+      )
+    );
+  };
+
   const getDatabaseConnections = () => {
     const databaseConnections = edges
       .filter((edge) => {
@@ -53,7 +61,13 @@ const Flowable = () => {
     <div style={{ width: "100%", height: "80vh", paddingTop: "0px" }}>
       <ReactFlowProvider>
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes.map((node) => ({
+            ...node,
+            data: {
+              ...node.data,
+              onInputChange: handleInputChange,
+            },
+          }))}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -88,4 +102,3 @@ const Flowable = () => {
 };
 
 export default Flowable;
-

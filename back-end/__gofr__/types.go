@@ -46,3 +46,8 @@ type NewFilterType struct {
 	DataType string `json"dataType"`
 	Filter map[string]interface{} `json:"filter"`
 }
+
+type DeleteFilterType struct {
+	FilterName   string `json:"filterName"`
+	DataType string `json"dataType"`
+}

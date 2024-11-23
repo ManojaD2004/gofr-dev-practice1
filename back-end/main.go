@@ -27,6 +27,8 @@ func main() {
 	app.GET("/.__gofr__/get-all-types", __gofr__.GetAllTypesRoute)
 	// Filter Routes Handler
 	app.POST("/.__gofr__/create-filter", __gofr__.CreateFilter)
+	app.POST("/.__gofr__/delete-filter", __gofr__.DeleteFilter)
+	app.GET("/.__gofr__/get-all-filters", __gofr__.GetAllFilter)
 	// it can be over-ridden through configs
 	app.Run()
 }

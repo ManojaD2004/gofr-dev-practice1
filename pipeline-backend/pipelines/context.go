@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,7 +32,16 @@ func GetMySQLDB(c context.Context, mysqlKey string) *sql.DB {
 func GetMongoDB(c context.Context, mysqlKey string) *mongo.Client {
 	db, ok := c.Value(mysqlKey).(*mongo.Client)
 	if !ok {
-		log.Fatal("No MySQL database connection found in context")
+		log.Fatal("No MongoDB database connection found in context")
+	}
+	return db
+}
+
+
+func GetRedis(c context.Context, mysqlKey string) *redis.Client {
+	db, ok := c.Value(mysqlKey).(*redis.Client)
+	if !ok {
+		log.Fatal("No Redis database connection found in context")
 	}
 	return db
 }

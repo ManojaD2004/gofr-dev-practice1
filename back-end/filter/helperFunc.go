@@ -3,6 +3,7 @@ package filter
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 func convertToFloat64(a interface{}) float64 {
@@ -55,4 +56,14 @@ func lenneq(a interface{}, b interface{}) bool {
 
 func req(a interface{}, b bool) bool {
 	return a != nil || !b
+}
+
+func ststr(a string, b string) bool {
+	return strings.HasPrefix(a, b)
+}
+func endstr(a string, b string) bool {
+	return strings.HasSuffix(a, b)
+}
+func constr(a string, b string) bool {
+	return strings.Contains(a, b)
 }

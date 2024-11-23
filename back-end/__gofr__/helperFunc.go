@@ -148,6 +148,19 @@ func handleValidatePart(v *string, part string, vari string) {
 	} else if strings.HasPrefix(part, "req=") {
 		skipNo = 4
 		*v += "req(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "cate=email") {
+		*v += "cateemail(q" + vari + ")"
+	} else if strings.HasPrefix(part, "cate=url") {
+		*v += "cateurl(q" + vari + ")"
+	} else if strings.HasPrefix(part, "ststr=") {
+		skipNo = 6
+		*v += "ststr(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "endstr=") {
+		skipNo = 7
+		*v += "endstr(q" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "constr=") {
+		skipNo = 7
+		*v += "constr(q" + vari + ", " + part[skipNo:] + ")"
 	}
 }
 
@@ -180,6 +193,15 @@ func handleFilterPart(v *string, part string, vari string) {
 	} else if strings.HasPrefix(part, "req=") {
 		skipNo = 4
 		*v += "req(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "ststr=") {
+		skipNo = 6
+		*v += "ststr(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "endstr=") {
+		skipNo = 7
+		*v += "endstr(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "constr=") {
+		skipNo = 7
+		*v += "constr(" + vari + ", " + part[skipNo:] + ")"
 	}
 }
 
@@ -188,16 +210,19 @@ func recurFilter(m *map[string]interface{}, s *string, level int, parent string)
 		switch val := value.(type) {
 		case string:
 			parts := strings.Fields(val)
+			if !isPrimitiveType(parts[0]) {
+				continue
+			}
 			// Filter Part
-			if len(parts) > 0 {
+			if len(parts) > 1 {
 				*s += strings.Repeat("\t", level) + "a = a"
 			}
-			for i := 0; i < len(parts); i++ {
+			for i := 1; i < len(parts); i++ {
 				*s += " && "
 				part := parts[i]
 				handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key)))
 			}
-			if len(parts) > 0 {
+			if len(parts) > 1 {
 				*s += "\n"
 			}
 		case map[string]interface{}:
@@ -208,16 +233,19 @@ func recurFilter(m *map[string]interface{}, s *string, level int, parent string)
 				case string:
 					// Filter Part
 					parts := strings.Fields(val1)
-					if len(parts) > 0 {
+					if !isPrimitiveType(parts[0]) {
+						continue
+					}
+					if len(parts) > 1 {
 						*s += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(d" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
 						*s += strings.Repeat("\t", level) + "\ta = a"
 					}
-					for i := 0; i < len(parts); i++ {
+					for i := 1; i < len(parts); i++ {
 						*s += " && "
 						part := parts[i]
 						handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
 					}
-					if len(parts) > 0 {
+					if len(parts) > 1 {
 						*s += "\n" + strings.Repeat("\t", level) + "}\n"
 					}
 				case map[string]interface{}:

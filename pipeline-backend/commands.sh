@@ -1,7 +1,7 @@
 # Redis
-docker run --name gofr-redis -p 6379:6379 -d redis     
+docker run --name redis-1 -p 6379:6379 -d redis     
 
-docker exec -it gofr-redis bash -c 'redis-cli SET greeting "Hello from Redis."'
+docker exec -it redis-1 bash -c 'redis-cli SET greeting "Hello from Redis."'
 
 # MySQL
 docker run --name gofr-mysql -e MYSQL_ROOT_PASSWORD=root123 -e MYSQL_DATABASE=test_db -p 3306:3306 -d mysql:8.0.30

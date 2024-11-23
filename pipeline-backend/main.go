@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
-	"time"
-
 	d "github.com/ManojaD2004/db"
 	p "github.com/ManojaD2004/pipelines"
 	_ "github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/bson"
 	"gofr.dev/pkg/gofr"
+	"log"
+	"os"
+	"strconv"
+	"time"
 )
 
 type Student struct {
@@ -38,6 +38,7 @@ func main() {
 	d.AddPSQL("psql-db1", "user=postgres dbname=postgres port=5432 password=pass host=localhost sslmode=disable")
 	d.AddMySQL("mysql-db2", "root:pass@tcp(127.0.0.1:3306)/mysql")
 	d.AddMongoDB("mongodb-db3", "mongodb://localhost:27017")
+	d.AddRedis("redis-db4", "localhost:6379")
 	initFun := p.AddPipeline(nil, func(c1 context.Context) {
 		fmt.Println("Init Func!")
 	})
@@ -160,10 +161,21 @@ func main() {
 			fmt.Println("Inserted document with ID:", insertResult.InsertedID)
 			fmt.Println(stdB)
 		}
-		stdReports = []StudentReport{}
 		fmt.Println("Job 3_2 done, inserting to mongodb!")
 	})
-	f4 := p.AddPipeline(f3_2, func(c1 context.Context) {
+	f3_3 := p.AddPipeline(f3_2, func(c1 context.Context) {
+		db3 := p.GetRedis(c1, "redis-db4")
+		for i := 0; i < len(stdReports); i++ {
+			jsonData, _ := json.Marshal(stdReports[i])
+			err := db3.Set(c1, stdReports[i].Category, string(jsonData), 0).Err()
+			if err != nil {
+				log.Fatal("Failed to set key", err)
+			}
+		}
+		stdReports = []StudentReport{}
+		fmt.Println("Job 3_3 done, inserting to redis!")
+	})
+	f4 := p.AddPipeline(f3_3, func(c1 context.Context) {
 		// db1 := p.GetPSQLDB(c1, "psql-db1")
 		// db2 := p.GetMySQLDB(c1, "mysql-db2")
 		// db1.Close()

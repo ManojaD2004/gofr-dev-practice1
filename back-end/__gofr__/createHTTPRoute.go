@@ -18,7 +18,7 @@ func CreateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 		ctx.File.ChDir("..")
 		retType.IsDone = false
 		retType.Message = "Cannot open ./go.mod file!"
-		return nil, err1
+		return retType, nil
 	}
 	s := ""
 	reader1.Next()

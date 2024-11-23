@@ -150,3 +150,86 @@ func handleValidatePart(v *string, part string, vari string) {
 		*v += "req(q" + vari + ", " + part[skipNo:] + ")"
 	}
 }
+
+func handleFilterPart(v *string, part string, vari string) {
+	skipNo := 0
+	if strings.HasPrefix(part, "gt=") {
+		skipNo = 3
+		*v += "gt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lt=") {
+		skipNo = 3
+		*v += "lt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "eq=") {
+		skipNo = 3
+		*v += "eq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "neq=") {
+		skipNo = 4
+		*v += "neq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lengt=") {
+		skipNo = 6
+		*v += "lengt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lenlt=") {
+		skipNo = 6
+		*v += "lenlt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "leneq=") {
+		skipNo = 6
+		*v += "leneq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lenneq=") {
+		skipNo = 7
+		*v += "lenneq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "req=") {
+		skipNo = 4
+		*v += "req(" + vari + ", " + part[skipNo:] + ")"
+	}
+}
+
+func recurFilter(m *map[string]interface{}, s *string, level int, parent string) {
+	for key, value := range *m {
+		switch val := value.(type) {
+		case string:
+			parts := strings.Fields(val)
+			// Filter Part
+			if len(parts) > 0 {
+				*s += strings.Repeat("\t", level) + "a = a"
+			}
+			for i := 0; i < len(parts); i++ {
+				*s += " && "
+				part := parts[i]
+				handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key)))
+			}
+			if len(parts) > 0 {
+				*s += "\n"
+			}
+		case map[string]interface{}:
+			recurFilter(&val, s, level+1, parent+"."+capWord(toUnderscore(key)))
+		case []interface{}:
+			if len(val) == 1 {
+				switch val1 := val[0].(type) {
+				case string:
+					// Filter Part
+					parts := strings.Fields(val1)
+					if len(parts) > 0 {
+						*s += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(d" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+						*s += strings.Repeat("\t", level) + "\ta = a"
+					}
+					for i := 0; i < len(parts); i++ {
+						*s += " && "
+						part := parts[i]
+						handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
+					}
+					if len(parts) > 0 {
+						*s += "\n" + strings.Repeat("\t", level) + "}\n"
+					}
+				case map[string]interface{}:
+					*s += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(d" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+					recurFilter(&val1, s, level+1, parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
+					*s += strings.Repeat("\t", level) + "}\n"
+				default:
+					fmt.Println("Error 2!", reflect.TypeOf(val1))
+				}
+			}
+		default:
+			fmt.Println("Error 1!", reflect.TypeOf(val))
+		}
+	}
+}

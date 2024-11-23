@@ -25,8 +25,8 @@ func main() {
 	app.POST("/.__gofr__/update-type", __gofr__.UpdateTypeRoute)
 	app.POST("/.__gofr__/get-type", __gofr__.GetTypeRoute)
 	app.GET("/.__gofr__/get-all-types", __gofr__.GetAllTypesRoute)
-	// Types Routes Handler
-	app.POST("/.__gofr__/create-validate-type", __gofr__.CreateValidateTypeRoute)
+	// Filter Routes Handler
+	app.POST("/.__gofr__/create-filter", __gofr__.CreateFilter)
 	// it can be over-ridden through configs
 	app.Run()
 }

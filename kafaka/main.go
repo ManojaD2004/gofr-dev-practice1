@@ -48,10 +48,7 @@ func main() {
 		if err != nil {
 			return nil, fmt.Errorf("could not write to temporary file: %v", err)
 		}
-		// err = processCSV(tempFile.Name())
-		// if err != nil {
-		// 	return nil, fmt.Errorf("could not process CSV file: %v", err)
-		// }
+		
        producer.Producer(request.TableName,request.FileName)
 	   consumer.Consumer()
 		return fmt.Sprintf("Successfully processed CSV file for table '%s'", request.TableName), nil
@@ -59,22 +56,3 @@ func main() {
 	app.Run()
 }
 
-// func processCSV(filePath string) error {
-// 	file, err := os.Open(filePath)
-// 	if err != nil {
-// 		return fmt.Errorf("could not open CSV file: %v", err)
-// 	}
-// 	defer file.Close()
-
-// 	reader := csv.NewReader(file)
-// 	records, err := reader.ReadAll()
-// 	if err != nil {
-// 		return fmt.Errorf("could not read CSV file: %v", err)
-// 	}
-
-// 	for _, record := range records {
-// 		fmt.Println("Record:", record)
-// 	}
-
-// 	return nil
-// }

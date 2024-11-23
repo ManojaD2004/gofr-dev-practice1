@@ -10,7 +10,7 @@ const Header = () => {
         <Link href="/route-create" className='hover:underline hover:underline-offset-4'>Get/Delete Route</Link>
         <Link href="/type-data" className='hover:underline hover:underline-offset-4'>Create/Update Type</Link>
         <Link href="/flow" className='hover:underline hover:underline-offset-4'>Flow</Link>
-        <Link href="/filter" className='hover:underline hover:underline-offset-4'>Filter</Link>
+        <Link href="/upload-csv" className='hover:underline hover:underline-offset-4'>Upload csv</Link>
       </ul>
     </div>
   )

@@ -26,17 +26,61 @@ const Datasender = () => {
   const [dropdownSelection, setDropdownSelection] = useState("");
   const [requestJSON, setRequestJSON] = useState("");
   const [typeName, setTypeName] = useState("");
+  const [allowedTypes, setAllowedTypes] = useState([
+    "string",
+    "int",
+    "float32",
+    "float64",
+    "bool",
+  ]);
+  const [isEditorDisabled, setIsEditorDisabled] = useState(false);
+ 
 
   useEffect(() => {
     setDomLoaded(true);
+    typeloading();
   }, []);
-  function validateDataType(jsonData) {
-    const allowedTypes = ["string", "int", "float32", "float64", "bool"];
 
+  const typeloading = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/.__gofr__/get-all-types`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      const { data } = result;
+
+      if (!data) {
+        throw new Error("Data field not found in the response.");
+      }
+
+      const frameworks = Object.keys(data).map((type) => type);
+
+      setAllowedTypes((prevFramework) => [...prevFramework, ...frameworks]);
+
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  function validateDataType(jsonData) {
     const validateValue = (value, key) => {
       if (typeof value === "string") {
-        const seperateWords = value.split(" ");
-        const firstWord = seperateWords[0];
+        const separateWords = value.split(" ");
+        const firstWord = separateWords[0];
         if (!allowedTypes.includes(firstWord)) {
           return {
             isValid: false,
@@ -78,6 +122,7 @@ const Datasender = () => {
 
   const handleSend = async () => {
     try {
+      console.log(allowedTypes);
       if (!typeName) {
         toast.error("Please enter a type name");
         return;
@@ -86,47 +131,92 @@ const Datasender = () => {
         toast.error("Please select a dropdown option");
         return;
       }
-
-      const parsedJSON = JSON.parse(requestJSON);
-      const validationResult = validateDataType(parsedJSON);
-
-      if (!validationResult.isValid) {
-        toast.error(validationResult.message);
-        return;
-      }
-
-      const data = {
-        input: typeName,
-        dropdown: dropdownSelection,
-        editorContent: parsedJSON,
+  
+ 
+      let data = {
+        typeName: typeName,
       };
-
-      console.log("Send Data:", data);
-
-      const response = await fetch(``, {
+  
+   
+      if (dropdownSelection === "CREATE" || dropdownSelection === "UPDATE") {
+        if (!requestJSON) {
+          toast.error("Editor content cannot be empty for this action.");
+          return;
+        }
+  
+        try {
+        
+          const parsedJSON = JSON.parse(requestJSON);
+          const validationResult = validateDataType(parsedJSON);
+  
+          if (!validationResult.isValid) {
+            toast.error(validationResult.message);
+            return;
+          }
+  
+      
+          data.typeBody = parsedJSON;
+        } catch (parseError) {
+          toast.error("Invalid JSON format in the editor.");
+          console.error("JSON Parsing Error:", parseError);
+          return;
+        }
+      }
+  
+      console.log("Send Data:", data); 
+  
+      
+      let apiEndpoint = "";
+      if (dropdownSelection === "GET") {
+        apiEndpoint = "http://localhost:8000/.__gofr__/get-type";
+      } else if (dropdownSelection === "CREATE") {
+        apiEndpoint = "http://localhost:8000/.__gofr__/create-type";
+      } else if (dropdownSelection === "DELETE") {
+        apiEndpoint = "http://localhost:8000/.__gofr__/delete-type";
+      } else if (dropdownSelection === "UPDATE") {
+        apiEndpoint = "http://localhost:8000/.__gofr__/update-type";
+      }
+  
+      
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
-
+  
       if (!response.ok) {
         toast.error("Error creating API");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const result = await response.json();
-      console.log("Successful", result);
+      console.log("Successful:", result);
+      setRequestJSON(JSON.stringify(result, null, 2));
+      typeloading();
       toast.success("Data is valid and sent!");
     } catch (error) {
-      toast.error("Invalid JSON format.");
-      console.error("JSON Parsing Error:", error);
+      toast.error("An error occurred. Please check your input.");
+      console.error("Error:", error);
     }
   };
-
+  
   const handleEditorChange = (value) => {
     setRequestJSON(value);
+  };
+
+  const handleDropdownChange = (selection) => {
+    setDropdownSelection(selection);
+
+   
+    if (selection === "GET" || selection === "DELETE") {
+      setIsEditorDisabled(true);
+    } else {
+      setIsEditorDisabled(false);
+    }
+
+    setRequestJSON(""); 
   };
 
   return (
@@ -144,7 +234,7 @@ const Datasender = () => {
           </div>
 
           <div className="text-white z-30 bg-black font-semibold">
-            <DropdownMenu className="">
+            <DropdownMenu>
               <DropdownMenuTrigger className="cursor-pointer bg-[#1e1e1e] h-[45px] text-white px-8 py-2 w-48  hover:bg-[#3e3e3e] flex items-center justify-between gap-2 border border-transparent">
                 {dropdownSelection || "Select Type"}{" "}
                 <ChevronDownIcon className="h-4 w-4" />
@@ -152,35 +242,27 @@ const Datasender = () => {
               <DropdownMenuContent className="bg-[#1e1e1e] text-white rounded shadow-lg border border-gray-700 w-48 z-50 font-semibold">
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
-                  onClick={() => {
-                    setDropdownSelection("GET");
-                    setRequestJSON("");
-                  }}
+                  onClick={() => handleDropdownChange("GET")}
                 >
                   GET
-                  <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
-                  onClick={() => setDropdownSelection("CREATE")}
+                  onClick={() => handleDropdownChange("CREATE")}
                 >
                   CREATE
-                  <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                 </DropdownMenuItem>
-
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
-                  onClick={() => {setDropdownSelection("DELETE"); setRequestJSON("")}}
+                  onClick={() => handleDropdownChange("DELETE")}
                 >
                   DELETE
-                  <DropdownMenuShortcut>⇧⌘D</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
-                  onClick={() => setDropdownSelection("UPDATE")}
+                  onClick={() => handleDropdownChange("UPDATE")}
                 >
                   UPDATE
-                  <DropdownMenuShortcut>⇧⌘U</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -208,6 +290,7 @@ const Datasender = () => {
               theme="vs-dark"
               onChange={handleEditorChange}
               onMount={() => setLoading(false)}
+              options={{ readOnly: isEditorDisabled }}
             />
           </div>
         )}

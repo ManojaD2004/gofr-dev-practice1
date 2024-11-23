@@ -1,8 +1,7 @@
 package main
 
 import (
-	// "context"
-	// "fmt"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -13,10 +12,8 @@ import (
 	d "github.com/ManojaD2004/db"
 	p "github.com/ManojaD2004/pipelines"
 	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/bson"
 	"gofr.dev/pkg/gofr"
-	// "github.com/jmoiron/sqlx"
-	// "gofr.dev/pkg/gofr"
-	// "net/http"
 )
 
 type Student struct {
@@ -34,12 +31,18 @@ type StudentReport struct {
 }
 
 func main() {
-	db1 := d.AddPSQL("user=postgres dbname=postgres port=5432 password=pass host=localhost sslmode=disable")
-	db2 := d.AddMySQL("root:pass@tcp(127.0.0.1:3306)/mysql")
+	p.C1 = context.Background()
 	stdReport := StudentReport{}
 	stdReports := []StudentReport{}
 	stdRecs := []Student{}
-	f := p.AddPipeline(func() {
+	d.AddPSQL("psql-db1", "user=postgres dbname=postgres port=5432 password=pass host=localhost sslmode=disable")
+	d.AddMySQL("mysql-db2", "root:pass@tcp(127.0.0.1:3306)/mysql")
+	d.AddMongoDB("mongodb-db3", "mongodb://localhost:27017")
+	initFun := p.AddPipeline(nil, func(c1 context.Context) {
+		fmt.Println("Init Func!")
+	})
+	f := p.AddPipeline(initFun, func(c1 context.Context) {
+		db1 := p.GetPSQLDB(c1, "psql-db1")
 		rows, nil := db1.Queryx("SELECT * FROM students;")
 		for rows.Next() {
 			stdRec := Student{}
@@ -52,9 +55,11 @@ func main() {
 		}
 
 		fmt.Println("Job 1 done!")
-	}, nil)
-	f1 := p.AddPipeline(func() {
+	})
+	f1 := p.AddPipeline(f, func(c1 context.Context) {
 		month := time.Now().Month().String()
+		db2 := p.GetMySQLDB(c1, "mysql-db2")
+		db2.Exec("DELETE FROM student_report;")
 		stdReport.Month = month
 		avgMark := 0.0
 		for i := 0; i < len(stdRecs); i++ {
@@ -94,9 +99,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		stdRecs = []Student{}
 		fmt.Println("Job 2 Done!")
-	}, f)
-	f2 := p.AddPipeline(func() {
+	})
+	f2 := p.AddPipeline(f1, func(c1 context.Context) {
+		db2 := p.GetMySQLDB(c1, "mysql-db2")
 		rows, nil := db2.Query("SELECT * FROM student_report;")
 		for rows.Next() {
 			stdRec := StudentReport{}
@@ -107,10 +114,9 @@ func main() {
 			fmt.Println(stdRec)
 			stdReports = append(stdReports, stdRec)
 		}
-		db2.Exec("DELETE FROM student_report;")
 		fmt.Println("Both the job have completed, cleaning up the records!!")
-	}, f1)
-	f3 := p.AddPipeline(func() {
+	})
+	f3 := p.AddPipeline(f2, func(c1 context.Context) {
 		file, err := os.Create("student_reports.csv")
 		if err != nil {
 			log.Fatal(err)
@@ -136,12 +142,38 @@ func main() {
 			}
 		}
 		fmt.Println("Job 3 done, writing to .CSV file!")
-	}, f2)
-	// db1.Close()
-	// db2.Close()
+	})
+	f3_2 := p.AddPipeline(f3, func(c1 context.Context) {
+		db3 := p.GetMongoDB(c1, "mongodb-db3")
+		stdCollections := db3.Database("mongo-db1").Collection("student_report")
+		delResult, err := stdCollections.DeleteMany(c1, bson.M{})
+		if err != nil {
+			log.Fatal("Error cleaning collections:", err)
+		}
+		fmt.Println("Deleted all docs in collections:", delResult.DeletedCount)
+		for i := 0; i < len(stdReports); i++ {
+			stdB := bson.M{"name": stdReports[i].Name, "category": stdReports[i].Category, "marks": stdReports[i].Marks, "month": stdReports[i].Month, "rollno": stdReports[i].Rollno}
+			insertResult, err := stdCollections.InsertOne(c1, stdB)
+			if err != nil {
+				log.Fatal("Error inserting document:", err)
+			}
+			fmt.Println("Inserted document with ID:", insertResult.InsertedID)
+			fmt.Println(stdB)
+		}
+		stdReports = []StudentReport{}
+		fmt.Println("Job 3_2 done, inserting to mongodb!")
+	})
+	f4 := p.AddPipeline(f3_2, func(c1 context.Context) {
+		// db1 := p.GetPSQLDB(c1, "psql-db1")
+		// db2 := p.GetMySQLDB(c1, "mysql-db2")
+		// db1.Close()
+		// db2.Close()
+		// drive.Googledrive("credentials.json", "student_reports.csv")
+		fmt.Println("Job 4 done, uploading to Google Drive, uncommented the above line!")
+	})
 	app := gofr.New()
 	app.POST("/try", func(c *gofr.Context) (interface{}, error) {
-		f3()
+		f4(p.C1)
 		return "done", nil
 	})
 	app.Run()

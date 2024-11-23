@@ -1,11 +1,13 @@
 package pipelines
 
+import "context"
+
 // PostgresSQL To MYSQL
-func AddPipeline(f func(), prev func()) func() {
-	return func() {
+func AddPipeline(prev func(c1 context.Context), f func(c1 context.Context)) func(c1 context.Context) {
+	return func(c1 context.Context) {
 		if prev != nil {
-			prev()
+			prev(c1)
 		}
-		f()
+		f(c1)
 	}
 }

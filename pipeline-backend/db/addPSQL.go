@@ -1,22 +1,24 @@
 package db
 
 import (
-	"log"
+	"context"
+	pipe "github.com/ManojaD2004/pipelines"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"log"
 )
 
-func AddPSQL(conncString string) *sqlx.DB {
+func AddPSQL(dbName string, conncString string) {
 	db, err := sqlx.Connect("postgres", conncString)
 	if err != nil {
 		log.Fatalln(err)
-		return nil
+		return
 	}
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
-		return nil
+		return
 	} else {
-		log.Println("Successfully Connected")
+		log.Println("Successfully Connected PSQL")
 	}
-	return db
+	pipe.C1 = context.WithValue(pipe.C1, dbName, db)
 }

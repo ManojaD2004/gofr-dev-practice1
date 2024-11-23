@@ -7,6 +7,10 @@ docker exec -it gofr-redis bash -c 'redis-cli SET greeting "Hello from Redis."'
 docker run --name gofr-mysql -e MYSQL_ROOT_PASSWORD=root123 -e MYSQL_DATABASE=test_db -p 3306:3306 -d mysql:8.0.30
 
 docker exec -it gofr-mysql mysql -uroot -proot123 test_db -e "CREATE TABLE customers (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL);"
+# MongoDB
+docker run --name mongo-db1 -it -p 27017:27017 -d mongo:tag
+docker run -it --network host --rm mongo mongosh --host localhost mongo-db1
+
 # Tracing
 docker run --name gofr-zipkin -p 2005:9411 -d openzipkin/zipkin:latest
 docker run -d --name jaeger -e COLLECTOR_OTLP_ENABLED=true \

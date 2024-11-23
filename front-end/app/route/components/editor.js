@@ -36,90 +36,6 @@ const Editor = dynamic(() => import("@monaco-editor/react"), {
     </div>
   ),
 });
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-  {
-    value: "next.js1",
-    label: "Next.js1",
-  },
-  {
-    value: "sveltekit1",
-    label: "SvelteKit1",
-  },
-  {
-    value: "nuxt.js1",
-    label: "Nuxt.js1",
-  },
-  {
-    value: "remix1",
-    label: "Remix1",
-  },
-  {
-    value: "astro1",
-    label: "Astro1",
-  },
-];
-const frameworks1 = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-  {
-    value: "next.js1",
-    label: "Next.js1",
-  },
-  {
-    value: "sveltekit1",
-    label: "SvelteKit1",
-  },
-  {
-    value: "nuxt.js1",
-    label: "Nuxt.js1",
-  },
-  {
-    value: "remix1",
-    label: "Remix1",
-  },
-  {
-    value: "astro1",
-    label: "Astro1",
-  },
-];
 
 const Editorsender = () => {
   const [domLoaded, setDomLoaded] = useState(false);
@@ -132,54 +48,53 @@ const Editorsender = () => {
   const [value1, setValue1] = useState("");
   const [value2, setValue2] = useState("");
 
+  const [framework, setFramework] = useState([]);
+  const [framework1, setFramework1] = useState([]);
+
   useEffect(() => {
     setDomLoaded(true);
+    typeloading();
   }, []);
-  function validateDataType(jsonData) {
-    const allowedTypes = ["string", "int", "float32", "float64", "bool"];
+  const typeloading = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/.__gofr__/get-all-types`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    const validateValue = (value, key) => {
-      if (typeof value === "string") {
-        const seperateWords = value.split(" ");
-        const firstWord = seperateWords[0];
-        if (!allowedTypes.includes(firstWord)) {
-          return {
-            isValid: false,
-            message: `Invalid data type for key: \`${key}\``,
-          };
-        }
-      } else if (Array.isArray(value)) {
-        for (const item of value) {
-          if (typeof item === "object" && item !== null) {
-            const nestedResult = validateDataType(item);
-            if (!nestedResult.isValid) {
-              return nestedResult;
-            }
-          } else {
-            return {
-              isValid: false,
-              message: `Invalid value in array for key: \`${key}\``,
-            };
-          }
-        }
-      } else if (typeof value === "object" && value !== null) {
-        const nestedResult = validateDataType(value);
-        if (!nestedResult.isValid) {
-          return nestedResult;
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return { isValid: true };
-    };
 
-    for (const [key, value] of Object.entries(jsonData)) {
-      const result = validateValue(value, key);
-      if (!result.isValid) {
-        return result;
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      const { data } = result;
+
+      if (!data) {
+        throw new Error("Data field not found in the response.");
       }
+
+      const frameworks = Object.keys(data).map((type) => ({
+        value: type,
+        label: type.charAt(0).toUpperCase() + type.slice(1),
+      }));
+
+      setFramework(frameworks);
+      setFramework1(frameworks);
+
+      console.log("Frameworks:", frameworks);
+
+      return data;
+    } catch (error) {
+      console.error(error);
     }
-
-    return { isValid: true, message: "All data types are valid." };
-  }
+  };
 
   const handleSend = async () => {
     try {
@@ -192,43 +107,40 @@ const Editorsender = () => {
         return;
       }
 
-      const parsedJSON = JSON.parse(requestJSON);
-      const validationResult = validateDataType(parsedJSON);
-
-      if (!validationResult.isValid) {
-        toast.error(validationResult.message);
-        return;
-      }
-
       const data = {
-        input: typeName,
-        dropdown: dropdownSelection,
-        editorContent: parsedJSON,
-        value1: value1,
-        value2: value2,
+        routeName: typeName,
+        method: dropdownSelection,
+        reqBodyType: value1,
+        resBodyType: value2,
       };
-
       console.log("Send Data:", data);
 
-      const response = await fetch(``, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `http://localhost:8000/.__gofr__/create-route`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!response.ok) {
+        const errorResponse = await response.text();
+        console.error("Error Response:", errorResponse);
         toast.error("Error creating API");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log("Successful", result);
+
+      console.log("Successful Response:", result);
       toast.success("Data is valid and sent!");
+      setRequestJSON(JSON.stringify(result, null, 2));
     } catch (error) {
-      toast.error("Invalid JSON format.");
       console.error("JSON Parsing Error:", error);
+      toast.error("An error occurred while sending data.");
     }
   };
 
@@ -315,7 +227,7 @@ const Editorsender = () => {
                 className="w-[200px] justify-between border-[#6b6b6b]"
               >
                 {value1
-                  ? frameworks1.find((framework) => framework.value === value1)
+                  ? framework1.find((framework) => framework.value === value1)
                       ?.label
                   : "Select type..."}
                 <ChevronsUpDown className="opacity-50" />
@@ -327,14 +239,11 @@ const Editorsender = () => {
               align="start"
             >
               <Command>
-                <CommandInput
-                  placeholder="Search type"
-                  className="h-9"
-                />
+                <CommandInput placeholder="Search type" className="h-9" />
                 <CommandList>
                   <CommandEmpty>No type found.</CommandEmpty>
                   <CommandGroup>
-                    {frameworks1.map((framework) => (
+                    {framework1.map((framework) => (
                       <CommandItem
                         key={framework.value}
                         value={framework.value}
@@ -373,7 +282,7 @@ const Editorsender = () => {
                 className="w-[200px] justify-between border-[#6b6b6b]"
               >
                 {value2
-                  ? frameworks.find((framework) => framework.value === value2)
+                  ? framework.find((framework_) => framework_.value === value2)
                       ?.label
                   : "Select type..."}
                 <ChevronsUpDown className="opacity-50" />
@@ -392,7 +301,7 @@ const Editorsender = () => {
                 <CommandList>
                   <CommandEmpty>No type found.</CommandEmpty>
                   <CommandGroup>
-                    {frameworks.map((framework) => (
+                    {framework.map((framework) => (
                       <CommandItem
                         key={framework.value}
                         value={framework.value}

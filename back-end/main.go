@@ -10,7 +10,7 @@ func main() {
 	// initialise gofr object
 	app := gofr.New()
 	// register routes
-	app.DELETE("/user2", r.User2DELETEHandler)
+	app.POST("/student", r.StudentPOSTHandler)
 	// Dummy route
 	app.GET("/greet", r.GreetRouteGET)
 	// HTTP Routes Handler
@@ -27,10 +27,6 @@ func main() {
 	app.GET("/.__gofr__/get-all-types", __gofr__.GetAllTypesRoute)
 	// Types Routes Handler
 	app.POST("/.__gofr__/create-validate-type", __gofr__.CreateValidateTypeRoute)
-	// app.POST("/.__gofr__/delete-type", __gofr__.DeleteTypeRoute)
-	// app.POST("/.__gofr__/update-type", __gofr__.UpdateTypeRoute)
-	// app.POST("/.__gofr__/get-type", __gofr__.GetTypeRoute)
-	// app.GET("/.__gofr__/get-all-types", __gofr__.GetAllTypesRoute)
 	// it can be over-ridden through configs
 	app.Run()
 }

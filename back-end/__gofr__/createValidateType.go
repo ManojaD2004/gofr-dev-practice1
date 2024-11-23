@@ -18,8 +18,9 @@ func CreateValidateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	s = "package types\n\n" + s
 	v = "func (q *" + capWord(typeName1) + "Type) Validate() bool {\n" + "\ta := true\n" + v 
 	v = v + "\treturn a" + "\n}"
+	s += "\n"+v+"\n"
+	v = ""
 	fmt.Println(s)
-	fmt.Println(v)
 	// ctx.File.ChDir("./types")
 	// fileName := typeName1 + ".go"
 	// f, _ := ctx.File.Open(fileName)

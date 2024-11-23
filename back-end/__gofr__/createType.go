@@ -3,7 +3,6 @@ package __gofr__
 import (
 	"encoding/json"
 	"fmt"
-
 	"gofr.dev/pkg/gofr"
 )
 
@@ -12,10 +11,15 @@ func CreateTypeRoute(ctx *gofr.Context) (interface{}, error) {
 	retType := ReturnType{}
 	ctx.Bind(&newType)
 	s := ""
-	recur(&newType.TypeBody, &s, 1)
+	v := ""
+	recurValidate(&newType.TypeBody, &s, &v, 1, "")
 	typeName1 := toUnderscore(newType.TypeName)
 	s = "type " + capWord(typeName1) + "Type " + s
 	s = "package types\n\n" + s
+	v = "func (q *" + capWord(typeName1) + "Type) Validate() bool {\n" + "\ta := true\n" + v
+	v = v + "\treturn a" + "\n}"
+	s += "\n" + v + "\n"
+	v = ""
 	ctx.File.ChDir("./types")
 	fileName := typeName1 + ".go"
 	f, _ := ctx.File.Open(fileName)

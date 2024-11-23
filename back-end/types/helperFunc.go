@@ -21,39 +21,39 @@ func convertToFloat64(a interface{}) float64 {
 	return a2
 }
 
-func Gt(a interface{}, b interface{}) bool {
+func gt(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) >= convertToFloat64(b)
 }
 
-func Lt(a interface{}, b interface{}) bool {
+func lt(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) <= convertToFloat64(b)
 }
 
-func Eq(a interface{}, b interface{}) bool {
+func eq(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) == convertToFloat64(b)
 }
 
-func Neq(a interface{}, b interface{}) bool {
+func neq(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) != convertToFloat64(b)
 }
 
-func Lengt(a string, b interface{}) bool {
+func lengt(a string, b interface{}) bool {
 	return convertToFloat64(len(a)) >= convertToFloat64(b)
 }
 
-func Lenlt(a string, b interface{}) bool {
+func lenlt(a string, b interface{}) bool {
 	return convertToFloat64(len(a)) <= convertToFloat64(b)
 }
 
-func Leneq(a interface{}, b interface{}) bool {
+func leneq(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) == convertToFloat64(b)
 }
 
-func Lenneq(a interface{}, b interface{}) bool {
+func lenneq(a interface{}, b interface{}) bool {
 	return convertToFloat64(a) != convertToFloat64(b)
 }
 
-func Req(a interface{}, b bool) bool {
+func req(a interface{}, b bool) bool {
 	return a != nil || !b
 }
 

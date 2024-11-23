@@ -1,20 +1,12 @@
 package types
 
 type User2Type struct {
-	Class struct {
-		Class2 string `json:"class2"`
-		More_Class []struct {
-			School4 []struct {
-				Class5 string `json:"class5"`
-			} `json:"school4"`
-			Class3 string `json:"class3"`
-		} `json:"more-Class"`
-		Class_1 []int `json:"class 1"`
-	} `json:"class"`
-	UserName string `json:"userName"`
-	PhoneNo int `json:"phoneNo"`
+	AllStudent []User1Type `json:"allStudent"`
 }
-
 func (q *User2Type) Validate() bool {
-	return q.PhoneNo == 00
+	a := true
+	for i1 := 0; i1 < len(q.AllStudent); i1++ {
+		a = a && q.AllStudent[i1].Validate()
+	}
+	return a
 }

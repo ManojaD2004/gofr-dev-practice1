@@ -1,4 +1,4 @@
-package types
+package filter
 
 import (
 	"fmt"
@@ -56,4 +56,3 @@ func lenneq(a interface{}, b interface{}) bool {
 func req(a interface{}, b bool) bool {
 	return a != nil || !b
 }
-

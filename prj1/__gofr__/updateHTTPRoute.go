@@ -3,6 +3,7 @@ package __gofr__
 import (
 	"encoding/json"
 	"fmt"
+
 	"gofr.dev/pkg/gofr"
 )
 
@@ -16,7 +17,7 @@ func UpdateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 		ctx.File.ChDir("..")
 		retType.IsDone = false
 		retType.Message = "Cannot open ./go.mod file!"
-		return nil, err1
+		return retType, nil
 	}
 	s := ""
 	reader1.Next()
@@ -26,14 +27,16 @@ func UpdateHTTPRoute(ctx *gofr.Context) (interface{}, error) {
 	f.Close()
 	funcName := toUnderscore(newRoute.RouteName[1:]) + newRoute.Method + "Handler"
 	fmt.Printf("%v\n", modName)
-	s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"` + modName + `/types"` + "\n)\n\n"
+	s = "package route\n\n" + "import (\n\t" + `"gofr.dev/pkg/gofr"` + "\n\tt " + `"` + modName + `/types"` + "\n\t" + `"errors"` + "\n)\n\n"
 	s = s + "func " + capWord(funcName) + " " + "(ctx *gofr.Context) (interface{}, error) {\n"
 	if newRoute.Method != "GET" || newRoute.ReqBodyType != "" {
 		s = s + "\treqBody := t." + capWord(toUnderscore(newRoute.ReqBodyType)) + "Type{}\n"
 		s = s + "\tctx.Bind(" + "&reqBody" + ")\n"
+		s = s + "\tif !reqBody.Validate() {\n" + "\t\treturn nil, errors.New(\"invalid Data Format\")" + "\n\t}\n"
 	}
 	s = s + "\tresBody := t." + capWord(toUnderscore(newRoute.ResBodyType)) + "Type{}\n"
 	s = s + "\t// Your code logic goes here\n\t\n"
+	s = s + "\tif !resBody.Validate() {\n" + "\t\treturn nil, errors.New(\"invalid Data Format\")" + "\n\t}\n"
 	s = s + "\treturn resBody, nil\n"
 	s = s + "}\n\n"
 	ctx.File.ChDir("./route")

@@ -1,16 +1,17 @@
-"use client";
 import React from "react";
-import Datasender from "./components/datasender";
+
 import Header from "../components/Header";
+import CustomNodeFlow from "./components/flowable";
+
 
 const Page = () => {
   return (
-    <>
-      <div>
+    <div>
+      
         <Header />
-        <Datasender />
-      </div>
-    </>
+        <CustomNodeFlow />
+      
+    </div>
   );
 };
 

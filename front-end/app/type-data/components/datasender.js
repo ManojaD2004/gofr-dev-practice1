@@ -34,7 +34,6 @@ const Datasender = () => {
     "bool",
   ]);
   const [isEditorDisabled, setIsEditorDisabled] = useState(false);
- 
 
   useEffect(() => {
     setDomLoaded(true);
@@ -68,7 +67,7 @@ const Datasender = () => {
 
       const frameworks = Object.keys(data).map((type) => type);
 
-      setAllowedTypes((prevFramework) => [...prevFramework, ...frameworks]);
+      setAllowedTypes((prevFramework) => Array.from(new Set([...prevFramework, ...frameworks])));
 
       setLoading(false);
     } catch (error) {
@@ -78,9 +77,11 @@ const Datasender = () => {
 
   function validateDataType(jsonData) {
     const validateValue = (value, key) => {
+      console.log(key, value)
       if (typeof value === "string") {
         const separateWords = value.split(" ");
         const firstWord = separateWords[0];
+        // console.log(separateWords);
         if (!allowedTypes.includes(firstWord)) {
           return {
             isValid: false,
@@ -89,20 +90,13 @@ const Datasender = () => {
         }
       } else if (Array.isArray(value)) {
         for (const item of value) {
-          if (typeof item === "object" && item !== null) {
-            const nestedResult = validateDataType(item);
-            if (!nestedResult.isValid) {
-              return nestedResult;
-            }
-          } else {
-            return {
-              isValid: false,
-              message: `Invalid value in array for key: \`${key}\``,
-            };
+          const nestedResult = validateValue(item, key);
+          if (!nestedResult.isValid) {
+            return nestedResult;
           }
-        }
+        } 
       } else if (typeof value === "object" && value !== null) {
-        const nestedResult = validateDataType(value);
+        const nestedResult = validateValue(value, key);
         if (!nestedResult.isValid) {
           return nestedResult;
         }
@@ -131,30 +125,26 @@ const Datasender = () => {
         toast.error("Please select a dropdown option");
         return;
       }
-  
- 
+
       let data = {
         typeName: typeName,
       };
-  
-   
+
       if (dropdownSelection === "CREATE" || dropdownSelection === "UPDATE") {
         if (!requestJSON) {
           toast.error("Editor content cannot be empty for this action.");
           return;
         }
-  
+
         try {
-        
           const parsedJSON = JSON.parse(requestJSON);
-          const validationResult = validateDataType(parsedJSON);
-  
+         {/*} const validationResult = validateDataType(parsedJSON);
+
           if (!validationResult.isValid) {
             toast.error(validationResult.message);
             return;
-          }
-  
-      
+          } */}
+
           data.typeBody = parsedJSON;
         } catch (parseError) {
           toast.error("Invalid JSON format in the editor.");
@@ -162,10 +152,9 @@ const Datasender = () => {
           return;
         }
       }
-  
-      console.log("Send Data:", data); 
-  
-      
+
+      console.log("Send Data:", data);
+
       let apiEndpoint = "";
       if (dropdownSelection === "GET") {
         apiEndpoint = "http://localhost:8000/.__gofr__/get-type";
@@ -176,8 +165,7 @@ const Datasender = () => {
       } else if (dropdownSelection === "UPDATE") {
         apiEndpoint = "http://localhost:8000/.__gofr__/update-type";
       }
-  
-      
+
       const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
@@ -185,12 +173,12 @@ const Datasender = () => {
         },
         body: JSON.stringify(data),
       });
-  
+
       if (!response.ok) {
         toast.error("Error creating API");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const result = await response.json();
       console.log("Successful:", result);
       setRequestJSON(JSON.stringify(result, null, 2));
@@ -201,7 +189,7 @@ const Datasender = () => {
       console.error("Error:", error);
     }
   };
-  
+
   const handleEditorChange = (value) => {
     setRequestJSON(value);
   };
@@ -209,14 +197,13 @@ const Datasender = () => {
   const handleDropdownChange = (selection) => {
     setDropdownSelection(selection);
 
-   
     if (selection === "GET" || selection === "DELETE") {
       setIsEditorDisabled(true);
     } else {
       setIsEditorDisabled(false);
     }
 
-    setRequestJSON(""); 
+    setRequestJSON("");
   };
 
   return (
@@ -280,11 +267,11 @@ const Datasender = () => {
       <div className="px-8 bg-[#1e1e1e] border-[#6b6b6b] ">
         {domLoaded && (
           <div
-            style={{ height: "75vh" }}
+            style={{ height: "52vh" }}
             className="border-[#6b6b6b] border-[1px]"
           >
             <Editor
-              height="70vh"
+              height="50vh"
               value={requestJSON}
               language="json"
               theme="vs-dark"

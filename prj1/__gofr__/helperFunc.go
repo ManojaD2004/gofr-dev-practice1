@@ -3,7 +3,7 @@ package __gofr__
 import (
 	"fmt"
 	"reflect"
-	// "strconv"
+	"strconv"
 	"strings"
 )
 
@@ -21,36 +21,6 @@ func toUnderscore(input string) string {
 	return result
 }
 
-func recur(m *map[string]interface{}, s *string, level int) {
-	*s += "struct {\n"
-	for key, value := range *m {
-		switch val := value.(type) {
-		case string:
-			*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " " + val + " `json:\"" + key + "\"`\n"
-		case map[string]interface{}:
-			*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " "
-			recur(&val, s, level+1)
-			*s = *s + " `json:\"" + key + "\"`\n"
-		case []interface{}:
-			if len(val) == 1 {
-				switch val1 := val[0].(type) {
-				case string:
-					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + val1 + " `json:\"" + key + "\"`\n"
-				case map[string]interface{}:
-					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []"
-					recur(&val1, s, level+1)
-					*s = *s + " `json:\"" + key + "\"`\n"
-				default:
-					fmt.Println("Error 2!", reflect.TypeOf(val1))
-				}
-			}
-		default:
-			fmt.Println("Error 1!", reflect.TypeOf(val))
-		}
-	}
-	*s += strings.Repeat("\t", level-1) + "}"
-}
-
 func recurValidate(m *map[string]interface{}, s *string, v *string, level int, parent string) {
 	*s += "struct {\n"
 	for key, value := range *m {
@@ -60,13 +30,13 @@ func recurValidate(m *map[string]interface{}, s *string, v *string, level int, p
 			fieldType := parts[0]
 			if !isPrimitiveType(fieldType) {
 				// Validate Part
-				*v += "\ta = a && q" + parent + "." + capWord(toUnderscore(key)) + ".Validate()\n"
+				*v += strings.Repeat("\t", level) + "a = a && q" + parent + "." + capWord(toUnderscore(key)) + ".Validate()\n"
 				// Type Part
 				*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " " + capWord(toUnderscore(fieldType)) + "Type `json:\"" + key + "\"`\n"
 			} else {
 				// Validate Part
 				if len(parts) > 1 {
-					*v += "\ta = a"
+					*v += strings.Repeat("\t", level) + "a = a"
 				}
 				for i := 1; i < len(parts); i++ {
 					*v += " && "
@@ -91,30 +61,33 @@ func recurValidate(m *map[string]interface{}, s *string, v *string, level int, p
 					fieldType := parts[0]
 					if !isPrimitiveType(fieldType) {
 						// Validate Part
-						*v += "\tfor i := 0; i < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i++ {\n"
-						*v += "\t\ta = a && " + "q" + parent + "." + capWord(toUnderscore(key)) + "[i].Validate()\n"
-						*v += "\t}\n"
+						*v += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+						*v += strings.Repeat("\t", level) + "\ta = a && " + "q" + parent + "." + capWord(toUnderscore(key)) + "[i" + strconv.Itoa(level) + "].Validate()\n"
+						*v += strings.Repeat("\t", level) + "}\n"
 						// Type Part
 						*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + capWord(toUnderscore(fieldType)) + "Type `json:\"" + key + "\"`\n"
 					} else {
 						// Validate Part
 						if len(parts) > 1 {
-							*v += "\tfor i := 0; i < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i++ {\n"
-							*v += "\t\ta = a"
+							*v += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+							*v += strings.Repeat("\t", level) + "\ta = a"
 						}
 						for i := 1; i < len(parts); i++ {
 							*v += " && "
 							part := parts[i]
-							handleValidatePart(v, part, parent+"."+capWord(toUnderscore(key))+"[i]")
+							handleValidatePart(v, part, parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
 						}
 						if len(parts) > 1 {
-							*v += "\n\t}\n"
+							*v += "\n" + strings.Repeat("\t", level) + "}\n"
 						}
 						// Type Part
 						*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []" + fieldType + " `json:\"" + key + "\"`\n"
 					}
 				case map[string]interface{}:
-					recurValidate(&val1, s, v, level+1, parent+"."+capWord(toUnderscore(key)))
+					*s = *s + strings.Repeat("\t", level) + capWord(toUnderscore(key)) + " []"
+					*v += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(q" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+					recurValidate(&val1, s, v, level+1, parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
+					*v += strings.Repeat("\t", level) + "}\n"
 					*s = *s + " `json:\"" + key + "\"`\n"
 				default:
 					fmt.Println("Error 2!", reflect.TypeOf(val1))
@@ -150,30 +123,113 @@ func handleValidatePart(v *string, part string, vari string) {
 	skipNo := 0
 	if strings.HasPrefix(part, "gt=") {
 		skipNo = 3
-		*v += "Gt(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "gt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lt=") {
 		skipNo = 3
-		*v += "Lt(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "lt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "eq=") {
 		skipNo = 3
-		*v += "Eq(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "eq(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "neq=") {
 		skipNo = 4
-		*v += "Neq(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "neq(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lengt=") {
 		skipNo = 6
-		*v += "Lengt(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "lengt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lenlt=") {
 		skipNo = 6
-		*v += "Lenlt(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "lenlt(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "leneq=") {
 		skipNo = 6
-		*v += "Leneq(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "leneq(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "lenneq=") {
 		skipNo = 7
-		*v += "Lenneq(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "lenneq(q" + vari + ", " + part[skipNo:] + ")"
 	} else if strings.HasPrefix(part, "req=") {
 		skipNo = 4
-		*v += "Req(q" + vari + ", " + part[skipNo:] + ")"
+		*v += "req(q" + vari + ", " + part[skipNo:] + ")"
+	}
+}
+
+func handleFilterPart(v *string, part string, vari string) {
+	skipNo := 0
+	if strings.HasPrefix(part, "gt=") {
+		skipNo = 3
+		*v += "gt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lt=") {
+		skipNo = 3
+		*v += "lt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "eq=") {
+		skipNo = 3
+		*v += "eq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "neq=") {
+		skipNo = 4
+		*v += "neq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lengt=") {
+		skipNo = 6
+		*v += "lengt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lenlt=") {
+		skipNo = 6
+		*v += "lenlt(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "leneq=") {
+		skipNo = 6
+		*v += "leneq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "lenneq=") {
+		skipNo = 7
+		*v += "lenneq(" + vari + ", " + part[skipNo:] + ")"
+	} else if strings.HasPrefix(part, "req=") {
+		skipNo = 4
+		*v += "req(" + vari + ", " + part[skipNo:] + ")"
+	}
+}
+
+func recurFilter(m *map[string]interface{}, s *string, level int, parent string) {
+	for key, value := range *m {
+		switch val := value.(type) {
+		case string:
+			parts := strings.Fields(val)
+			// Filter Part
+			if len(parts) > 0 {
+				*s += strings.Repeat("\t", level) + "a = a"
+			}
+			for i := 0; i < len(parts); i++ {
+				*s += " && "
+				part := parts[i]
+				handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key)))
+			}
+			if len(parts) > 0 {
+				*s += "\n"
+			}
+		case map[string]interface{}:
+			recurFilter(&val, s, level+1, parent+"."+capWord(toUnderscore(key)))
+		case []interface{}:
+			if len(val) == 1 {
+				switch val1 := val[0].(type) {
+				case string:
+					// Filter Part
+					parts := strings.Fields(val1)
+					if len(parts) > 0 {
+						*s += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(d" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+						*s += strings.Repeat("\t", level) + "\ta = a"
+					}
+					for i := 0; i < len(parts); i++ {
+						*s += " && "
+						part := parts[i]
+						handleFilterPart(s, part, "d"+parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
+					}
+					if len(parts) > 0 {
+						*s += "\n" + strings.Repeat("\t", level) + "}\n"
+					}
+				case map[string]interface{}:
+					*s += strings.Repeat("\t", level) + "for i" + strconv.Itoa(level) + " := 0; i" + strconv.Itoa(level) + " < len(d" + parent + "." + capWord(toUnderscore(key)) + "); i" + strconv.Itoa(level) + "++ {\n"
+					recurFilter(&val1, s, level+1, parent+"."+capWord(toUnderscore(key))+"[i"+strconv.Itoa(level)+"]")
+					*s += strings.Repeat("\t", level) + "}\n"
+				default:
+					fmt.Println("Error 2!", reflect.TypeOf(val1))
+				}
+			}
+		default:
+			fmt.Println("Error 1!", reflect.TypeOf(val))
+		}
 	}
 }

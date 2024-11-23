@@ -38,4 +38,11 @@ type ReturnType struct {
 type MetaDataType struct {
 	Types  map[string]map[string]interface{} `json:"types"`
 	Routes map[string]map[string]interface{} `json:"routes"`
+	Filter map[string]map[string]interface{} `json:"filter"`
+}
+
+type NewFilterType struct {
+	FilterName   string `json:"filterName"`
+	DataType string `json"dataType"`
+	Filter map[string]interface{} `json:"filter"`
 }

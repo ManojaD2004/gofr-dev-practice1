@@ -1,52 +1,4 @@
-// package consumer
-
-// import (
-// 	"context"
-// 	"fmt"
-// 	"log"
-// 	// "strings"
-// "time"
-// "io"
-// 	"github.com/jackc/pgx/v5/pgxpool"
-// 	"github.com/segmentio/kafka-go"
-// 	// "gofr-server/kafaka/producer"
-// )
-
-// func Consumer() {
-// 	ctx := context.Background()
-// 	connectionString := "postgresql://postgres.ejspmxevlxzxowxttbmy:Vilasbhai94!@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
-
-// 	pool, err := pgxpool.New(ctx, connectionString)
-// 	if err != nil {
-// 		log.Fatalf("Error while connecting to database: %v", err)
-// 	}
-// 	defer pool.Close()
-
-// 	kafkaReader := kafka.NewReader(kafka.ReaderConfig{
-// 		Brokers: []string{"localhost:9092"},
-// 		Topic:   "test-topic",
-// 		GroupID: "consumer-group",
-// 	})
-// 	defer kafkaReader.Close()
-
-	
-	// for {
-	// 	msg, err := kafkaReader.ReadMessage(ctx)
-	// 	if err != nil {
-	// 		log.Fatalf("Error reading message from Kafka: %v", err)
-	// 	}
-		
-	// 	fmt.Printf("Received message from Kafka: %s\n", string(msg.Value))
-		
-		
-			
-		
-	// 	}
-	// 	query := producer.GeneratedQuery
-	// fmt.Println("The generated create query is :")
-	// fmt.Println(query)
-	// }
-	package consumer
+package consumer
 
 import (
 	"context"
@@ -54,7 +6,6 @@ import (
 	"log"
 	"strings"
 	"time"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/segmentio/kafka-go"
 	"gofr-server/producer"
@@ -120,9 +71,9 @@ func parseMessage(msg string) []interface{} {
 	values := []interface{}{}
 
 	for _, part := range parts {
-		keyValue := strings.SplitN(part, ": ", 2) 
+		keyValue := strings.SplitN(part, ": ", 2)
 		if len(keyValue) == 2 {
-			values = append(values, keyValue[1]) 
+			values = append(values, keyValue[1])
 		} else {
 			log.Printf("Invalid part format: %s", part)
 			return nil
@@ -131,16 +82,10 @@ func parseMessage(msg string) []interface{} {
 	return values
 }
 
-	
-		// 	err := pool.Exec(ctx, query, firstName, lastName)
-		// 	if err != nil {
-		// 	log.Printf("Failed to insert data into DB: %v", err)
-		// } else {
-		// 		fmt.Println("Inserted a new tuple in table table_name2 successfully :)")
-		// 		fmt.Printf("FirstName: %s, LastName: %s\n", firstName, lastName)
-		// 	}
-		
-
-	
-
-	
+// 	err := pool.Exec(ctx, query, firstName, lastName)
+// 	if err != nil {
+// 	log.Printf("Failed to insert data into DB: %v", err)
+// } else {
+// 		fmt.Println("Inserted a new tuple in table table_name2 successfully :)")
+// 		fmt.Printf("FirstName: %s, LastName: %s\n", firstName, lastName)
+// 	}

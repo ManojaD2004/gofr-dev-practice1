@@ -1,0 +1,25 @@
+{
+    "typeName": "User",
+    "reqBody": {
+        "userName": "string",
+        "phoneNo": "int",
+        "class": {
+            "class1": ["string"],
+            "class2": "string",
+            "moreClass": [{
+                "class3": "string",
+                "school4": [{
+                    "class5": [{
+                        "class6": {
+                            "class7": "int"
+                        }
+                    }],
+                    "class7": "string"
+                }]
+            }]
+        }
+    },
+    "resBody": {
+        "userId": "int"
+    }
+}

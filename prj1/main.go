@@ -10,13 +10,12 @@ func main() {
 	// initialise gofr object
 	app := gofr.New()
 	// register routes
-	app.CREATE("/vila", r.VilaCREATEHandler)
-	app.CREATE("/vilas", r.VilasCREATEHandler)
-	app.CREATE("/aditya", r.AdityaCREATEHandler)
-	app.CREATE("/maoj", r.MaojCREATEHandler)
+	app.POST("/test123", r.Test123POSTHandler)
+	app.POST("/test", r.TestPOSTHandler)
+	
 	app.DELETE("/user2", r.User2DELETEHandler)
 	// Dummy route
-	app.GET("/greet", r.GreetRouteGET)
+
 	// HTTP Routes Handler
 	app.POST("/.__gofr__/create-route", __gofr__.CreateHTTPRoute)
 	app.POST("/.__gofr__/delete-route", __gofr__.DeleteHTTPRoute)

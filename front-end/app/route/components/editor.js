@@ -47,6 +47,7 @@ const Editorsender = () => {
   const [popoverOpen2, setPopoverOpen2] = useState(false);
   const [value1, setValue1] = useState("");
   const [value2, setValue2] = useState("");
+  const [method, setMethod] = useState("");
 
   const [framework, setFramework] = useState([]);
   const [framework1, setFramework1] = useState([]);
@@ -99,32 +100,52 @@ const Editorsender = () => {
   const handleSend = async () => {
     try {
       if (!typeName) {
-        toast.error("Please enter a type name");
+        toast.error("Please enter a route name");
         return;
       }
       if (!dropdownSelection) {
         toast.error("Please select a dropdown option");
         return;
       }
+      if (!value1) {
+        toast.error("Please select a request body type");
+        return;
+      }
+      if (!value2) {
+        toast.error("Please select a response body type");
+        return;
+      }
+      if (!method) {
+        toast.error("Please select a method");
+        return;
+      }
 
       const data = {
         routeName: typeName,
-        method: dropdownSelection,
+        method: method,
         reqBodyType: value1,
         resBodyType: value2,
       };
       console.log("Send Data:", data);
 
-      const response = await fetch(
-        `http://localhost:8000/.__gofr__/create-route`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      
+      let apiUrl = '';
+      if (dropdownSelection === 'CREATE') {
+        apiUrl = `http://localhost:8000/.__gofr__/create-route`;
+      } else if (dropdownSelection === 'UPDATE') {
+        apiUrl = `http://localhost:8000/.__gofr__/update-route`;
+      } else {
+        toast.error("Invalid dropdown selection");
+        return;
+      }
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       if (!response.ok) {
         const errorResponse = await response.text();
@@ -142,7 +163,8 @@ const Editorsender = () => {
       console.error("JSON Parsing Error:", error);
       toast.error("An error occurred while sending data.");
     }
-  };
+};
+
 
   const handleEditorChange = (value) => {
     setRequestJSON(value);
@@ -171,32 +193,12 @@ const Editorsender = () => {
               <DropdownMenuContent className="bg-[#1e1e1e] text-white rounded shadow-lg border border-gray-700 w-48 z-50 font-semibold">
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
-                  onClick={() => {
-                    setDropdownSelection("GET");
-                    setRequestJSON("");
-                  }}
-                >
-                  GET
-                  <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
                   onClick={() => setDropdownSelection("CREATE")}
                 >
                   CREATE
-                  <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>⇧⌘C</DropdownMenuShortcut>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
-                  onClick={() => {
-                    setDropdownSelection("DELETE");
-                    setRequestJSON("");
-                  }}
-                >
-                  DELETE
-                  <DropdownMenuShortcut>⇧⌘D</DropdownMenuShortcut>
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
                   onClick={() => setDropdownSelection("UPDATE")}
@@ -218,6 +220,7 @@ const Editorsender = () => {
       </div>
       <div className="flex pb-8 gap-[30px] px-8">
         <div className="flex items-center justify-center z-30">
+            <p className="mr-[1vh]">Select a type :</p>
           <Popover open={popoverOpen1} onOpenChange={setPopoverOpen1}>
             <PopoverTrigger asChild>
               <Button
@@ -273,6 +276,7 @@ const Editorsender = () => {
         </div>
 
         <div className="flex items-center justify-center z-30">
+            <p className="mr-[1vh]">Select a type :</p>
           <Popover open={popoverOpen2} onOpenChange={setPopoverOpen2}>
             <PopoverTrigger asChild>
               <Button
@@ -329,6 +333,57 @@ const Editorsender = () => {
             </PopoverContent>
           </Popover>
         </div>
+        <div className="text-white z-30 border-[#6b6b6b] border-[1px] font-semibold ml-[10vh]">
+
+          <DropdownMenu className="">
+            <DropdownMenuTrigger className="cursor-pointer bg-[#1e1e1e] h-[45px] text-white px-8 py-2 w-56  hover:bg-[#3e3e3e] flex items-center justify-between gap-2 border border-transparent">
+              {method || "Select Method"}{" "}
+              <ChevronDownIcon className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-[#1e1e1e] text-white rounded shadow-lg border border-gray-700 w-56 z-50 font-semibold">
+              <DropdownMenuItem
+                className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
+                onClick={() => {
+                  setMethod("GET");
+                }}
+              >
+                GET
+                <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-gray-700 rounded px-2 py-2 cursor-pointer"
+                onClick={() => setMethod("POST")}
+              >
+                POST
+                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
+                onClick={() => {
+                  setMethod("PATCH");
+                }}
+              >
+                PATCH
+                <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
+                onClick={() => setMethod("PUT")}
+              >
+                PUT
+                <DropdownMenuShortcut>⇧⌘T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-gray-700 rounded px-2 py-3 cursor-pointer"
+                onClick={() => setMethod("DELETE")}
+              >
+                DELETE
+                <DropdownMenuShortcut>⇧⌘D</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="px-8 bg-[#1e1e1e] border-[#6b6b6b] ">
@@ -344,6 +399,7 @@ const Editorsender = () => {
               theme="vs-dark"
               onChange={handleEditorChange}
               onMount={() => setLoading(false)}
+             
             />
           </div>
         )}

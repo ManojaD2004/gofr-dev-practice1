@@ -5,10 +5,10 @@ import (
 	t "github.com/ManojaD2004/types"
 )
 
-func VilasCREATEHandler (ctx *gofr.Context) (interface{}, error) {
+func Test123POSTHandler (ctx *gofr.Context) (interface{}, error) {
 	reqBody := t.IsDoneType{}
 	ctx.Bind(&reqBody)
-	resBody := t.UserType{}
+	resBody := t.User2Type{}
 	// Your code logic goes here
 	
 	return resBody, nil

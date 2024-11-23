@@ -31,7 +31,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 const Editor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
   loading: () => (
-    <div className="text-white flex items-center justify-center h-[80vh]">
+    <div className="text-white flex items-center justify-center h-[45vh]">
       Loading Editor...
     </div>
   ),

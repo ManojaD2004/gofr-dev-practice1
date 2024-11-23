@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/gocql/gocql"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,6 +43,14 @@ func GetRedis(c context.Context, mysqlKey string) *redis.Client {
 	db, ok := c.Value(mysqlKey).(*redis.Client)
 	if !ok {
 		log.Fatal("No Redis database connection found in context")
+	}
+	return db
+}
+
+func GetCassandra(c context.Context, mysqlKey string) *gocql.Session {
+	db, ok := c.Value(mysqlKey).(*gocql.Session)
+	if !ok {
+		log.Fatal("No Cassandra database connection found in context")
 	}
 	return db
 }

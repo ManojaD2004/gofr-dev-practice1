@@ -39,6 +39,7 @@ func main() {
 	d.AddMySQL("mysql-db2", "root:pass@tcp(127.0.0.1:3306)/mysql")
 	d.AddMongoDB("mongodb-db3", "mongodb://localhost:27017")
 	d.AddRedis("redis-db4", "localhost:6379")
+	d.AddCassandra("cassandra-db5", "localhost:9042")
 	initFun := p.AddPipeline(nil, func(c1 context.Context) {
 		fmt.Println("Init Func!")
 	})
@@ -100,7 +101,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		stdRecs = []Student{}
 		fmt.Println("Job 2 Done!")
 	})
 	f2 := p.AddPipeline(f1, func(c1 context.Context) {
@@ -175,7 +175,21 @@ func main() {
 		stdReports = []StudentReport{}
 		fmt.Println("Job 3_3 done, inserting to redis!")
 	})
-	f4 := p.AddPipeline(f3_3, func(c1 context.Context) {
+	f3_4 := p.AddPipeline(f3_3, func(c1 context.Context) {
+		db := p.GetCassandra(c1, "cassandra-db5")
+		err := db.Query("TRUNCATE students;").Exec()
+		if err != nil {
+			log.Fatal("Error cleaning data, ", err)
+		}
+		for i := 0; i < len(stdRecs); i++ {
+			err = db.Query("INSERT INTO students (name, rollno, marks) VALUES (?, ?, ?);", stdRecs[i].Name, stdRecs[i].Rollno, float32(stdRecs[i].Marks)).Exec()
+			if err != nil {
+				log.Fatal("Error inserting data, ", err)
+			}
+		}
+		fmt.Println("Done Writing all records to Cassandra DB!")
+	})
+	f4 := p.AddPipeline(f3_4, func(c1 context.Context) {
 		// db1 := p.GetPSQLDB(c1, "psql-db1")
 		// db2 := p.GetMySQLDB(c1, "mysql-db2")
 		// db1.Close()

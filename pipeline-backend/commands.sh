@@ -19,6 +19,9 @@ docker run -d --name jaeger -e COLLECTOR_OTLP_ENABLED=true \
   -p 14318:4318 \
   jaegertracing/all-in-one:1.41
 
+# Cassandra
+docker run --name cassandra-db1 -d -p 9042:9042 cassandra:latest
+
 # Kafka
 docker run -d  \
   --name broker \

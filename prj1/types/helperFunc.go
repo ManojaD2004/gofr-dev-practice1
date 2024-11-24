@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 )
 
 func convertToFloat64(a interface{}) float64 {
@@ -57,3 +59,23 @@ func req(a interface{}, b bool) bool {
 	return a != nil || !b
 }
 
+func cateemail(a string) bool {
+	re := regexp.MustCompile(`^(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
+	return re.MatchString(a)
+}
+
+func cateurl(a string) bool {
+	re := `^https?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$`
+	r := regexp.MustCompile(re)
+	return r.MatchString(a)
+}
+
+func ststr(a string, b string) bool {
+	return strings.HasPrefix(a, b)
+}
+func endstr(a string, b string) bool {
+	return strings.HasSuffix(a, b)
+}
+func constr(a string, b string) bool {
+	return strings.Contains(a, b)
+}

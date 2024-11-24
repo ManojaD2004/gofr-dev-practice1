@@ -1,6 +1,6 @@
 package types
 
-type StuType struct {
+type User123Type struct {
 	Friends []string `json:"friends"`
 	Marks []struct {
 		Mark float64 `json:"mark"`
@@ -10,7 +10,7 @@ type StuType struct {
 	Name string `json:"name"`
 	Rollno int `json:"rollno"`
 }
-func (q *StuType) Validate() bool {
+func (q *User123Type) Validate() bool {
 	a := true
 	for i1 := 0; i1 < len(q.Friends); i1++ {
 		a = a && lengt(q.Friends[i1], 10) && lenlt(q.Friends[i1], 100)

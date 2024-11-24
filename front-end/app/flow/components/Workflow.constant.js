@@ -10,7 +10,7 @@ export const initialNodes = [
   },
   {
    id: "2",
-   data: { name: "MongoDB", code: "mango" },
+   data: { name: "MongoDB", code: "mangodb" },
    position: { x: 550, y: 0 },
    type: "databaseoptions",
  },
@@ -31,7 +31,13 @@ export const initialNodes = [
    data: { name: "MySQL", code: "mysql" },
    position: { x: 550, y: 100 },
    type: "databaseoptions",
- }
+ },
+ {
+  id: "6",
+  data: { name: "Cassandra", code: "cassandra" },
+  position: { x: 550, y: -100 },
+  type: "databaseoptions",
+}
  
  
 ];

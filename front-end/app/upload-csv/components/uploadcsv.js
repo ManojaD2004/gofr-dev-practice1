@@ -22,28 +22,25 @@ const CsvUploader = () => {
     event.preventDefault();
 
     if (!file) {
-  toast.error("Please upload a file.");
+      toast.error("Please upload a file.");
       return;
     }
 
     if (!tablename) {
-      toast.error("Please enter a type name.");
+      toast.error("Please enter a table name.");
       return;
     }
-    const filename = file.name
 
     const formData = new FormData();
- 
-    formData.append("typename", tablename);
-    formData.append("filename", filename);
-    formData.append("file", file);
-
+    formData.append("tablename", tablename); // Match Go's "tablename"
+    formData.append("filename", file.name); // Match Go's "filename"
+    formData.append("csvfile", file); // Match Go's "csvfile"
 
     try {
       setUploading(true);
       setErrorMessage("");
 
-      const response = await fetch("https://your-api-endpoint.com/upload", {
+      const response = await fetch(`https://a0e4-119-82-122-154.ngrok-free.app/convertcsv`, {
         method: "POST",
         body: formData,
       });
@@ -52,10 +49,10 @@ const CsvUploader = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log("File uploaded successfully:", result);
-      toast.success("File uploaded successfully!");
-      alert("File uploaded successfully!");
+      const result = await response.text();
+      console.log("Response:", result);
+      toast.success("File uploaded and processed successfully!");
+      alert(result);
     } catch (error) {
       console.error("Error uploading file:", error);
       toast.error("Failed to upload file. Please try again.");
@@ -73,7 +70,7 @@ const CsvUploader = () => {
       <div className="flex flex-col items-center justify-center flex-grow">
         <div className="mb-6">
           <label
-            htmlFor="tableame"
+            htmlFor="tablename"
             className="block mb-2 text-sm font-medium text-white"
           >
             Table Name:
@@ -83,7 +80,7 @@ const CsvUploader = () => {
             placeholder="Enter table name"
             value={tablename}
             onChange={(e) => setTypeName(e.target.value)}
-            className="h-[45px] w-[400px] bg-[#1e1e1e] pl-[20px] border-[1px] font-sans text-sm border-[#6b6b6b] "
+            className="h-[45px] w-[400px] bg-[#1e1e1e] pl-[20px] border-[1px] font-sans text-sm border-[#6b6b6b]"
           />
         </div>
         <form
@@ -103,7 +100,7 @@ const CsvUploader = () => {
           </div>
         </form>
       </div>
-      <div className="flex justify-end items-center ">
+      <div className="flex justify-end items-center">
         <button
           onClick={handleSubmit}
           disabled={uploading}

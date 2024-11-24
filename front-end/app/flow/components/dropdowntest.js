@@ -3,10 +3,11 @@ import { useReactFlow } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 const options = [
-  { code: "mango", name: "MongoDB" },
+  { code: "mangodb", name: "MongoDB" },
   { code: "mysql", name: "MySQL" },
   { code: "postgresql", name: "PostgreSQL" },
   { code: "redis", name: "Redis" },
+  {code:"cassandra",name:"Cassandra"},
 ];
 
 const Dropdowntest = () => {

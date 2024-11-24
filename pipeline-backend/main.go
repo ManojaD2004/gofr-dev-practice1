@@ -198,7 +198,7 @@ func main() {
 		fmt.Println("Job 4 done, uploading to Google Drive, uncommented the above line!")
 	})
 	app := gofr.New()
-	app.POST("/try", func(c *gofr.Context) (interface{}, error) {
+	app.POST("/pipeline/trigger", func(c *gofr.Context) (interface{}, error) {
 		f4(p.C1)
 		return "done", nil
 	})

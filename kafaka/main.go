@@ -48,7 +48,7 @@ func main() {
 		if err != nil {
 			return nil, fmt.Errorf("could not write to temporary file: %v", err)
 		}
-		
+	
        producer.Producer(request.TableName,request.FileName)
 	   consumer.Consumer()
 		return fmt.Sprintf("Successfully processed CSV file for table '%s'", request.TableName), nil

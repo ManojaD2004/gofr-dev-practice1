@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
+  "time"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -23,6 +23,8 @@ func Producer(TableName string,fileName string) {
 	kafkaWriter := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"localhost:9092"},
 		Topic:   "test-topic",
+		BatchSize:     10000,              
+		BatchTimeout:  500 * time.Millisecond,
 	})
 	tempFilePath := fmt.Sprintf("./producer/%s", fileName)
 	file, err := os.Open(tempFilePath)
@@ -44,8 +46,8 @@ func Producer(TableName string,fileName string) {
 	}
 
 	if len(records) > 1 {
-        secondRow := records[1] // Extract second row (sample data)
-        dataTypes = getDataTypes(secondRow) // Infer data types
+        secondRow := records[1] 
+        dataTypes = getDataTypes(secondRow) 
         log.Println("Second row data types:", dataTypes)
     }
 
@@ -53,6 +55,7 @@ func Producer(TableName string,fileName string) {
     log.Println("Generated CREATE TABLE query:", GeneratedQuery)
     GeneratedInsertQuery = generateInsertQuery(firstRow) 
 	log.Println("Generated INSERT TABLE query:", GeneratedQuery)
+	j := 1
     for _, record := range records[1:] {
         message := generateKafkaMessage(firstRow, record)
         err := kafkaWriter.WriteMessages(ctx, kafka.Message{
@@ -61,7 +64,8 @@ func Producer(TableName string,fileName string) {
         if err != nil {
             log.Fatalf("Error writing message to Kafka: %v", err)
         }
-        fmt.Println("Sent to Kafka:", message)
+        fmt.Printf("%d) Sent to Kafka: %s\n",j, message)
+		j++
     }
 
     defer kafkaWriter.Close()

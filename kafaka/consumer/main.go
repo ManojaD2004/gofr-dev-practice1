@@ -36,7 +36,7 @@ func Consumer() {
 	defer kafkaReader.Close()
 
 	noMessageTimeout := 10 * time.Second
-
+   k:= 1
 	for {
 		ctxWithTimeout, cancel := context.WithTimeout(ctx, noMessageTimeout)
 		defer cancel()
@@ -51,7 +51,8 @@ func Consumer() {
 			continue
 		}
 		msgString := string(msg.Value)
-		fmt.Printf("Received message: %s\n", msgString)
+		fmt.Printf("%d) Received message: %s\n", k,msgString)
+		k++
 		values := parseMessage(msgString)
 		if values == nil {
 			log.Printf("Skipping invalid message: %s", msgString)
@@ -85,4 +86,5 @@ func parseMessage(msg string) []interface{} {
 
 	
 		
+	
 	

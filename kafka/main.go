@@ -6,8 +6,8 @@ import (
 	"os"
 	"gofr.dev/pkg/gofr"
 	"mime/multipart"
-	"gofr-server/kafaka/producer"
-	"gofr-server/kafaka/consumer"
+	"gofr-server/kafka/producer"
+	"gofr-server/kafka/consumer"
 )
 
 type CSVRequest struct {
